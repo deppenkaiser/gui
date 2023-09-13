@@ -51,7 +51,7 @@ void _main_window_action_callback(GSimpleAction* simple_action, GVariant* parame
 	}
 }
 
-void main_window_create(GtkApplication* app, void* user_data)
+void main_window_create(GtkApplication* app, void* user_data, bool show_menu)
 {
 	static struct _main_window core = {0};
 	core.user_data = user_data;
@@ -62,6 +62,7 @@ void main_window_create(GtkApplication* app, void* user_data)
     core.file_menu = main_window_create_sub_menu(core.menu_bar, "File");
 	
 	main_window_add_sub_menu_item(core.file_menu, "Exit", "exit", &core);
+	gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(core.main_window), show_menu ? TRUE : FALSE);
 
     gtk_widget_add_controller(core.main_window, core.keyboard_controller);
     g_signal_connect(core.keyboard_controller, "key-pressed", G_CALLBACK(_main_window_key_pressed), &core);
