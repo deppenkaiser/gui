@@ -1,6 +1,6 @@
 #include "gui/text.h"
 
-extern void text_callback(uint32_t id, GtkEntryBuffer* buffer, text_t data) __attribute__((weak));
+extern void text_callback(GtkEntryBuffer* buffer, text_t data) __attribute__((weak));
 
 text_t _text_get_core(GtkText* text);
 
@@ -9,7 +9,7 @@ void _text_changed(GtkEditable* self, gpointer user_data)
     text_t data = (text_t) user_data;
     if (text_callback != NULL)
     {
-        text_callback(data->id, gtk_text_get_buffer(GTK_TEXT(self)), data);
+        text_callback(gtk_text_get_buffer(GTK_TEXT(self)), data);
     }
 }
 
