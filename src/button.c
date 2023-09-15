@@ -1,6 +1,6 @@
 #include "gui/button.h"
 
-extern void button_callback(uint32_t id, button_t data) __attribute__((weak));
+extern void button_callback(button_t data) __attribute__((weak));
 
 button_t _button_get_core(GtkButton* button);
 
@@ -9,7 +9,7 @@ void _button_clicked(GtkButton* self, gpointer user_data)
     button_t data = (button_t) user_data;
     if (button_callback != NULL)
     {
-        button_callback(data->id, data);
+        button_callback(data);
     }
 }
 
