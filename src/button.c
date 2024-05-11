@@ -1,4 +1,4 @@
-#include "gui/button.h"
+#include "button.h"
 
 extern void button_callback(button_t data) __attribute__((weak));
 

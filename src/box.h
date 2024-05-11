@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gui/widget.h>
+#include "widget.h"
 
 GtkWidget* box_vertical_create(uint32_t spacing);
 GtkWidget* box_horizontal_create(uint32_t spacing);

@@ -1,4 +1,4 @@
-#include "gui/text.h"
+#include "text.h"
 
 extern void text_callback(GtkEntryBuffer* buffer, text_t data) __attribute__((weak));
 

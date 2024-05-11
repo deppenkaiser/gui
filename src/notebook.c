@@ -1,4 +1,4 @@
-#include "gui/notebook.h"
+#include "notebook.h"
 
 void notebook_create(GtkWidget* parent)
 {
