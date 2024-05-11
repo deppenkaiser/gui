@@ -20,14 +20,14 @@ target_sources(gui PRIVATE
 )
 
 target_include_directories(gui PRIVATE
-    PkgConfig::GTK4
     ${CMAKE_CURRENT_LIST_DIR}/include
     ${CMAKE_CURRENT_LIST_DIR}/../logging/include
     ${CMAKE_CURRENT_LIST_DIR}/../string/include
+    PkgConfig::GTK4
 )
 
 target_link_libraries(gui
-    PkgConfig::GTK4
     logging
     string
+    PkgConfig::GTK4
 )
