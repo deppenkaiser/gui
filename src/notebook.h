@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gtk-4.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 
 void notebook_create(GtkWidget* parent);
 uint32_t notebook_append_page(GtkWidget* notebook_parent, GtkWidget* widget, const char* label);

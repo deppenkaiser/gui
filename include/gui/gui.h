@@ -1,4 +1,4 @@
 #pragma once
 
-#include "../src/application.h"
-#include "../src/main_window.h"
+#include "../src/gui_application.h"
+#include "../src/gui_main_window.h"

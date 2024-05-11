@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gtk-4.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 
 typedef struct _drawing_area
 {

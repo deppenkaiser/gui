@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gdk/gdkkeysyms.h>
-#include "application.h"
+#include "gui_application.h"
 
 typedef enum mwe_types
 {

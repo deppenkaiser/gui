@@ -15,4 +15,4 @@ typedef struct _application
 	void* user_data;
 } *application_t;
 
-int32_t application_run(const char* name, int argc, char **argv, void* user_data);
+int32_t gui_application_run(const char* name, int argc, char **argv, void* user_data);
