@@ -39,9 +39,9 @@ int32_t gui_application_run(const char* name, int argc, char **argv, void* user_
     logging_log_message("Hello World!", true);
 	static struct gui_application core = {0};
 	#ifdef USE_GTK3
-		gtk_init(&argc, &argv);
+	gtk_init(&argc, &argv);
 	#else
-		gtk_init();
+	gtk_init();
 	#endif
 	core.app = gtk_application_new(name, G_APPLICATION_DEFAULT_FLAGS);
 	core.user_data = user_data;

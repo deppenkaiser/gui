@@ -2,6 +2,7 @@
 
 #include <gdk/gdkkeysyms.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "gui_application.h"
 
 typedef struct gui_main_window
@@ -58,6 +59,6 @@ typedef union _main_window_event
 	mwe_key_released_t key_released;
 } *main_window_event_t;
 
-void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu);
+void gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data, bool show_menu);
 GMenu* gui_main_window_create_sub_menu(GMenu* menu_bar, const char* sub_menu_name);
 void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, const char* action_name, gui_main_window_t data);

@@ -77,31 +77,32 @@ GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindo
 
 /*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
-void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu)
+void gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data, bool show_menu)
 {
 	static struct gui_main_window core = {0};
 	core.user_data = user_data;
 	core.app = app;
 	core.main_window = gtk_application_window_new(app);
 	#ifdef USE_GTK3
-		core.keyboard_controller = gtk_event_controller_key_new(core.main_window);
+	core.keyboard_controller = gtk_event_controller_key_new(core.main_window);
 	#else
-		core.keyboard_controller = gtk_event_controller_key_new();
-    	gtk_widget_add_controller(core.main_window, core.keyboard_controller);
+	core.keyboard_controller = gtk_event_controller_key_new();
+    gtk_widget_add_controller(core.main_window, core.keyboard_controller);
 	#endif
 	core.menu_bar = _gui_main_window_create_menu_bar(app, GTK_APPLICATION_WINDOW(core.main_window));
     core.file_menu = gui_main_window_create_sub_menu(core.menu_bar, "File");
 	
 	gui_main_window_add_sub_menu_item(core.file_menu, "Exit", "exit", &core);
 	gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(core.main_window), show_menu ? TRUE : FALSE);
+	gtk_window_set_default_size(GTK_WINDOW(core.main_window), width_pix, height_pix);
 
     //gtk_widget_add_controller(core.main_window, core.keyboard_controller);
     g_signal_connect(core.keyboard_controller, "key-pressed", G_CALLBACK(_gui_main_window_key_pressed), &core);
     g_signal_connect(core.keyboard_controller, "key-released", G_CALLBACK(_gui_main_window_key_released), &core);
 	#ifdef USE_GTK3
-		g_signal_connect(G_OBJECT(core.main_window), "delete-event", G_CALLBACK(_gui_main_window_close_request), &core);
+	g_signal_connect(G_OBJECT(core.main_window), "delete-event", G_CALLBACK(_gui_main_window_close_request), &core);
 	#else
-    	g_signal_connect(core.main_window, "close-request", G_CALLBACK(_gui_main_window_close_request), &core);
+    g_signal_connect(core.main_window, "close-request", G_CALLBACK(_gui_main_window_close_request), &core);
 	#endif
 
 	if (gui_main_window_callback != NULL)
@@ -113,7 +114,7 @@ void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu
 	}
 
 	#ifdef USE_GTK3
-		gtk_widget_show_all(core.main_window);
+	gtk_widget_show_all(core.main_window);
 	#endif
     gtk_window_present(GTK_WINDOW(core.main_window));
 
