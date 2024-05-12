@@ -54,7 +54,9 @@ void _gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* pa
 {
 	if (gui_main_window_action_callback != NULL)
 	{
+		logging_log_message("action event begin...", true);
 		gui_main_window_action_callback(simple_action, parameter, (gui_main_window_t) user_data);
+		logging_log_message("action event end...", true);
 	}
 }
 
