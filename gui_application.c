@@ -8,9 +8,9 @@ void _gui_application_startup(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
-		logging_log_message("application startup begin...", true);
+		logging_log_message("application startup begin.", true);
 		gui_application_callback(AE_STARTUP, (gui_application_t) user_data);
-		logging_log_message("application startup end...", true);
+		logging_log_message("application startup end.", true);
 	}
 }
 
@@ -18,9 +18,9 @@ void _gui_application_activate(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
-		logging_log_message("application activation begin...", true);
+		logging_log_message("application activation begin.", true);
 		gui_application_callback(AE_ACTIVATE, (gui_application_t) user_data);
-		logging_log_message("application activation end...", true);
+		logging_log_message("application activation end.", true);
 	}
 }
 
@@ -28,9 +28,9 @@ void _gui_application_shutdown(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
-		logging_log_message("application shutdown begin...", true);
+		logging_log_message("application shutdown begin.", true);
 		gui_application_callback(AE_SHUTDOWN, (gui_application_t) user_data);
-		logging_log_message("application shutdown end...", true);
+		logging_log_message("application shutdown end.", true);
 	}
 }
 

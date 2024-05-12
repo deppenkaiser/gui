@@ -99,9 +99,9 @@ void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu
 	if (gui_main_window_callback != NULL)
 	{
 		union _main_window_event e = {0};
-		logging_log_message("main window design phase begin...", true);
+		logging_log_message("main window design phase begin.", true);
 		gui_main_window_callback(MWE_BEFORE_PRESENT, &core, &e);
-		logging_log_message("main window design phase end...", true);
+		logging_log_message("main window design phase end.", true);
 	}
 
 	gtk_widget_show_all(core.main_window);
@@ -110,9 +110,9 @@ void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu
 	if (gui_main_window_callback != NULL)
 	{
 		union _main_window_event e = {0};
-		logging_log_message("main window initializing phase begin...", true);
+		logging_log_message("main window initializing phase begin.", true);
 		gui_main_window_callback(MWE_AFTER_PRESENT, &core, &e);
-		logging_log_message("main window initializing phase end...", true);
+		logging_log_message("main window initializing phase end.", true);
 	}
 }
 
