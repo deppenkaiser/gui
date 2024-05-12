@@ -1,4 +1,4 @@
-#include "gui/widget.h"
+#include "widget.h"
 
 void widget_set_name(GtkWidget* widget, const char* label)
 {

@@ -1,4 +1,4 @@
-#include "gui/box.h"
+#include "box.h"
 
 GtkWidget* box_vertical_create(uint32_t spacing)
 {
