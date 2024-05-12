@@ -1,6 +1,7 @@
 #include "gui_main_window.h"
 
 #include <string/string.h>
+#include <logging/logging.h>
 
 extern void gui_main_window_callback(mwe_types_t type, gui_main_window_t data, main_window_event_t e) __attribute__((weak));
 extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t data) __attribute__((weak));
@@ -17,7 +18,9 @@ gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval,
 	{
 		union _main_window_event e = {0};
 		e.key_pressed.keyval = keyval;
+		logging_log_message("key pressed event begin...", true);
 		gui_main_window_callback(MWE_KEY_PRESSED, (gui_main_window_t) user_data, &e);
+		logging_log_message("key pressed event end...", true);
 		handled = e.key_pressed.handled;
 	}
     return handled;
@@ -29,7 +32,9 @@ void _gui_main_window_key_released(GtkEventControllerKey* self, guint keyval, gu
 	{
 		union _main_window_event e = {0};
 		e.key_released.keyval = keyval;
+		logging_log_message("key released event begin...", true);
 		gui_main_window_callback(MWE_KEY_RELEASED, (gui_main_window_t) user_data, &e);
+		logging_log_message("key released event end...", true);
 	}
 }
 
@@ -91,7 +96,9 @@ void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu
 	if (gui_main_window_callback != NULL)
 	{
 		union _main_window_event e = {0};
+		logging_log_message("main window design phase begin...", true);
 		gui_main_window_callback(MWE_BEFORE_PRESENT, &core, &e);
+		logging_log_message("main window design phase end...", true);
 	}
 
     gtk_window_present(GTK_WINDOW(core.main_window));
@@ -99,7 +106,9 @@ void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu
 	if (gui_main_window_callback != NULL)
 	{
 		union _main_window_event e = {0};
+		logging_log_message("main window initializing phase begin...", true);
 		gui_main_window_callback(MWE_AFTER_PRESENT, &core, &e);
+		logging_log_message("main window initializing phase end...", true);
 	}
 }
 
