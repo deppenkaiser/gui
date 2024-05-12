@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gdk/gdkkeysyms.h>
+#include <stdbool.h>
 #include "gui_application.h"
 
 typedef struct gui_main_window

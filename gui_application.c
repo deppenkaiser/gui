@@ -38,7 +38,6 @@ int32_t gui_application_run(const char* name, int argc, char **argv, void* user_
 {
     logging_log_message("Hello World!", true);
 	static struct gui_application core = {0};
-	gtk_init();
 	core.app = gtk_application_new(name, G_APPLICATION_DEFAULT_FLAGS);
 	core.user_data = user_data;
     g_signal_connect(core.app, "activate", G_CALLBACK(_gui_application_activate), &core);
