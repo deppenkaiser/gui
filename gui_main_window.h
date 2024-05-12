@@ -3,6 +3,16 @@
 #include <gdk/gdkkeysyms.h>
 #include "gui_application.h"
 
+typedef struct gui_main_window
+{
+	GtkApplication* app;
+	GtkEventController* keyboard_controller;
+	GtkWidget* main_window;
+	GMenu* menu_bar;
+	GMenu* file_menu;
+	void* user_data;
+} *gui_main_window_t;
+
 typedef enum mwe_types
 {
 	MWE_BEFORE_PRESENT,
@@ -11,16 +21,6 @@ typedef enum mwe_types
 	MWE_KEY_PRESSED,
 	MWE_KEY_RELEASED
 } mwe_types_t;
-
-typedef struct _main_window
-{
-	GtkApplication* app;
-	GtkEventController* keyboard_controller;
-	GtkWidget* main_window;
-	GMenu* menu_bar;
-	GMenu* file_menu;
-	void* user_data;
-} *main_window_t;
 
 typedef struct _mwe_before_present
 {
@@ -57,6 +57,6 @@ typedef union _main_window_event
 	mwe_key_released_t key_released;
 } *main_window_event_t;
 
-void main_window_create(GtkApplication* app, void* user_data, bool show_menu);
-GMenu* main_window_create_sub_menu(GMenu* menu_bar, const char* sub_menu_name);
-void main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, const char* action_name, main_window_t data);
+void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu);
+GMenu* gui_main_window_create_sub_menu(GMenu* menu_bar, const char* sub_menu_name);
+void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, const char* action_name, gui_main_window_t data);
