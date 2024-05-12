@@ -2,36 +2,36 @@
 
 #include <logging/logging.h>
 
-extern void application_callback(application_events_t event, application_t data) __attribute__((weak));
+extern void gui_application_callback(gui_application_events_t event, gui_application_t data) __attribute__((weak));
 
 void _gui_application_startup(GApplication* app, gpointer user_data)
 {
-	if (application_callback != NULL)
+	if (gui_application_callback != NULL)
 	{
-		application_callback(AE_STARTUP, (application_t) user_data);
+		gui_application_callback(AE_STARTUP, (gui_application_t) user_data);
 	}
 }
 
 void _gui_application_activate(GApplication* app, gpointer user_data)
 {
-	if (application_callback != NULL)
+	if (gui_application_callback != NULL)
 	{
-		application_callback(AE_ACTIVATE, (application_t) user_data);
+		gui_application_callback(AE_ACTIVATE, (gui_application_t) user_data);
 	}
 }
 
 void _gui_application_shutdown(GApplication* app, gpointer user_data)
 {
-	if (application_callback != NULL)
+	if (gui_application_callback != NULL)
 	{
-		application_callback(AE_SHUTDOWN, (application_t) user_data);
+		gui_application_callback(AE_SHUTDOWN, (gui_application_t) user_data);
 	}
 }
 
 int32_t gui_application_run(const char* name, int argc, char **argv, void* user_data)
 {
-	static struct _application core;
-	core.app = gtk_application_new(name, G_APPLICATION_FLAGS_NONE);
+	static struct gui_application core = {0};
+	core.app = gtk_application_new(name, G_APPLICATION_DEFAULT_FLAGS);
 	core.user_data = user_data;
     g_signal_connect(core.app, "activate", G_CALLBACK(_gui_application_activate), &core);
     g_signal_connect(core.app, "startup", G_CALLBACK(_gui_application_startup), &core);
