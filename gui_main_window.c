@@ -83,7 +83,12 @@ void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu
 	core.user_data = user_data;
 	core.app = app;
 	core.main_window = gtk_application_window_new(app);
-	core.keyboard_controller = gtk_event_controller_key_new(core.main_window);
+	#ifdef USE_GTK3
+		core.keyboard_controller = gtk_event_controller_key_new(core.main_window);
+	#else
+		core.keyboard_controller = gtk_event_controller_key_new();
+    	gtk_widget_add_controller(core.main_window, core.keyboard_controller);
+	#endif
 	core.menu_bar = _gui_main_window_create_menu_bar(app, GTK_APPLICATION_WINDOW(core.main_window));
     core.file_menu = gui_main_window_create_sub_menu(core.menu_bar, "File");
 	
@@ -93,8 +98,11 @@ void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu
     //gtk_widget_add_controller(core.main_window, core.keyboard_controller);
     g_signal_connect(core.keyboard_controller, "key-pressed", G_CALLBACK(_gui_main_window_key_pressed), &core);
     g_signal_connect(core.keyboard_controller, "key-released", G_CALLBACK(_gui_main_window_key_released), &core);
-	//Gtk4 only
-    //g_signal_connect(core.main_window, "close-request", G_CALLBACK(_gui_main_window_close_request), &core);
+	#ifdef USE_GTK3
+		g_signal_connect(G_OBJECT(core.main_window), "delete-event", G_CALLBACK(_gui_main_window_close_request), &core);
+	#else
+    	g_signal_connect(core.main_window, "close-request", G_CALLBACK(_gui_main_window_close_request), &core);
+	#endif
 
 	if (gui_main_window_callback != NULL)
 	{
@@ -104,7 +112,9 @@ void gui_main_window_create(GtkApplication* app, void* user_data, bool show_menu
 		logging_log_message("main window design phase end.", true);
 	}
 
-	gtk_widget_show_all(core.main_window);
+	#ifdef USE_GTK3
+		gtk_widget_show_all(core.main_window);
+	#endif
     gtk_window_present(GTK_WINDOW(core.main_window));
 
 	if (gui_main_window_callback != NULL)
