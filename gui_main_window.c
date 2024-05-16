@@ -144,3 +144,25 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
 
 	_gui_main_window_add_action(data->app, action, data);
 }
+
+/*
+    ad->pipeline = cam_tis_create_pipeline_with_uri("playbin",
+        "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", ad);
+    if (ad->pipeline != NULL)
+    {
+        logging_log_message("pipeline created.", true);
+
+        #if USE_GTK3
+        GstElement* videosink = gst_element_factory_make("glsinkbin", "glsinkbin");
+        GstElement* gtkglsink = gst_element_factory_make("gtkglsink", "gtkglsink");
+        if ((videosink != NULL) && (gtkglsink != NULL))
+        {
+            g_object_set(videosink, "sink", gtkglsink, NULL);
+            g_object_get(gtkglsink, "widget", &ad->video_sink_widget, NULL);
+            g_object_set(ad->pipeline, "video-sink", videosink, NULL);
+            gtk_container_add(GTK_CONTAINER(data->main_window), ad->video_sink_widget);
+            logging_log_message("video sink widget created and added.", true);
+        }
+        #endif
+    }
+*/
