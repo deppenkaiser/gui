@@ -35,7 +35,7 @@ void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press,
 GtkWidget* gui_drawing_area_create(uint32_t id, uint32_t width, uint32_t height, void* user_data)
 {
     GtkWidget* drawing_area = gtk_drawing_area_new();
-	g_object_set_data(G_OBJECT(drawing_area), "core", malloc(sizeof(struct _drawing_area)));
+	g_object_set_data(G_OBJECT(drawing_area), "core", malloc(sizeof(struct drawing_area)));
 	drawing_area_t core = _gui_drawing_area_get_core(GTK_DRAWING_AREA(drawing_area));
 	core->drawing_area = drawing_area;
 	core->id = id;

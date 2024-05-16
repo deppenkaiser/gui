@@ -2,7 +2,7 @@
 
 #include <gtk/gtk.h>
 
-typedef struct _drawing_area
+typedef struct drawing_area
 {
 	GtkWidget* drawing_area;
 	void* user_data;
