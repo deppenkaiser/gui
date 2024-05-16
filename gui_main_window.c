@@ -83,7 +83,7 @@ gui_main_window_t _gui_main_window_get_core(GtkWidget* main_window)
 
 /*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
-void gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data, bool show_menu)
+GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data, bool show_menu)
 {
 	GtkWidget* main_window = gtk_application_window_new(app);
 	g_object_set_data(G_OBJECT(main_window), "core", malloc(sizeof(struct gui_main_window)));
@@ -133,8 +133,11 @@ void gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t he
 		gui_main_window_callback(MWE_AFTER_PRESENT, core, &e);
 		logging_log_message("main window initializing phase end.", true);
 	}
+
+	return main_window;
 }
 
+// must not be called if the window is closed by the user
 void gui_main_window_destroy(GtkWidget* main_window)
 {
 	free(_gui_main_window_get_core(main_window));
