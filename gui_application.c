@@ -4,6 +4,8 @@
 
 extern void gui_application_callback(gui_application_events_t event, gui_application_t data) __attribute__((weak));
 
+/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
+
 void _gui_application_startup(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
@@ -33,6 +35,8 @@ void _gui_application_shutdown(GApplication* app, gpointer user_data)
 		logging_log_message("application shutdown end.", true);
 	}
 }
+
+/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
 int32_t gui_application_run(const char* name, int argc, char **argv, void* user_data)
 {

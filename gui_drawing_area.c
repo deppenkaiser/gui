@@ -2,6 +2,8 @@
 
 extern void gui_drawing_area_callback(drawing_area_event_type_t type, drawing_area_t data, drawing_area_event_t e) __attribute__((weak));
 
+/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
+
 drawing_area_t _gui_drawing_area_get_core(GtkDrawingArea* drawing_area);
 
 void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, int width, int height, gpointer user_data)
@@ -31,6 +33,8 @@ void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press,
 		gui_drawing_area_callback(DAE_MOUSE_CLICK_LEFT, data, &e);
 	}
 }
+
+/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
 GtkWidget* gui_drawing_area_create(uint32_t id, uint32_t width, uint32_t height, void* user_data)
 {
