@@ -8,6 +8,8 @@ extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVaria
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
 
+#pragma region private
+
 GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindow* window);
 void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t data);
 gui_main_window_t _gui_main_window_get_core(GtkWidget* main_window);
@@ -81,7 +83,11 @@ gui_main_window_t _gui_main_window_get_core(GtkWidget* main_window)
 	return (gui_main_window_t) g_object_get_data(G_OBJECT(main_window), "core");
 }
 
+#pragma endregion
+
 /*------------------------------------------------- PUBLIC ------------------------------------------------------*/
+
+#pragma region public
 
 GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data, bool show_menu)
 {
@@ -163,6 +169,12 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
 	_gui_main_window_add_action(data->app, action, data);
 }
 
+#pragma endregion
+
+/*------------------------------------------------- SAMPLES ------------------------------------------------------*/
+
+#pragma region samples
+
 /*
     ad->pipeline = cam_tis_create_pipeline_with_uri("playbin",
         "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", ad);
@@ -184,3 +196,5 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
         #endif
     }
 */
+
+#pragma endregion
