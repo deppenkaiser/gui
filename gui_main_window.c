@@ -195,6 +195,12 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
         }
         #endif
     }
+
+	GstClockTime timestamp = GST_BUFFER_PTS(buffer);
+
+	g_print("Captured frame %d, Pixel Value=%03d Timestamp=%" GST_TIME_FORMAT "            \n",
+			framecount, pixel_data, GST_TIME_ARGS(timestamp));
+
 */
 
 #pragma endregion
