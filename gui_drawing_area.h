@@ -2,7 +2,7 @@
 
 #include <gtk/gtk.h>
 
-typedef struct _drawing_area
+typedef struct drawing_area
 {
 	GtkWidget* drawing_area;
 	void* user_data;
@@ -37,5 +37,5 @@ typedef union _drawing_area_event
 	mouse_left_click_event_t mouse_left_click_event;
 } *drawing_area_event_t;
 
-GtkWidget* drawing_area_create(uint32_t id, uint32_t width, uint32_t height, void* user_data);
-void drawing_area_destroy(GtkDrawingArea* drawing_area);
+GtkWidget* gui_drawing_area_create(uint32_t id, uint32_t width, uint32_t height, void* user_data);
+void gui_drawing_area_destroy(GtkDrawingArea* drawing_area);

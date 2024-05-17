@@ -2,5 +2,5 @@
 
 #include <gtk/gtk.h>
 
-GtkWidget* frame_create(const char* label, GtkWidget* widget);
-GtkWidget* frame_get_child(GtkFrame* frame);
+GtkWidget* gui_frame_create(const char* label, GtkWidget* widget);
+GtkWidget* gui_frame_get_child(GtkFrame* frame);
