@@ -89,7 +89,8 @@ gui_main_window_t _gui_main_window_get_core(GtkWidget* main_window)
 
 #pragma region public
 
-GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data, bool show_menu)
+GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data,
+	bool show_menu, bool resizeable)
 {
 	GtkWidget* main_window = gtk_application_window_new(app);
 	g_object_set_data(G_OBJECT(main_window), "core", malloc(sizeof(struct gui_main_window)));
@@ -109,6 +110,7 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	gui_main_window_add_sub_menu_item(core->file_menu, "Exit", "exit", core);
 	gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(core->main_window), show_menu ? TRUE : FALSE);
 	gtk_window_set_default_size(GTK_WINDOW(core->main_window), width_pix, height_pix);
+	gtk_window_set_resizable(GTK_WINDOW(core->main_window), resizeable ?  TRUE : FALSE);
 
     //gtk_widget_add_controller(core.main_window, core.keyboard_controller);
     g_signal_connect(core->keyboard_controller, "key-pressed", G_CALLBACK(_gui_main_window_key_pressed), core);
