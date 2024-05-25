@@ -1,4 +1,4 @@
-#include "gui_application.h"
+#include "application.h"
 
 #include <logging/logging.h>
 

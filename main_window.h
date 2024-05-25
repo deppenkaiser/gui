@@ -3,7 +3,8 @@
 #include <gdk/gdkkeysyms.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "gui_application.h"
+
+#include "application.h"
 
 typedef struct gui_main_window
 {

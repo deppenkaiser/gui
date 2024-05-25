@@ -1,4 +1,4 @@
-#include "gui_drawing_area.h"
+#include "drawing_area.h"
 
 extern void gui_drawing_area_callback(drawing_area_event_type_t type, drawing_area_t data, drawing_area_event_t e) __attribute__((weak));
 

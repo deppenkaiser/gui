@@ -1,4 +1,4 @@
-#include "gui_frame.h"
+#include "frame.h"
 
 GtkWidget* gui_frame_create(const char* label, GtkWidget* widget)
 {

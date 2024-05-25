@@ -1,4 +1,4 @@
-#include "gui_main_window.h"
+#include "main_window.h"
 
 #include <string/string.h>
 #include <logging/logging.h>
