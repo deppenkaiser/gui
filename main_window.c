@@ -203,17 +203,6 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
 	g_print("Captured frame %d, Pixel Value=%03d Timestamp=%" GST_TIME_FORMAT "            \n",
 			framecount, pixel_data, GST_TIME_ARGS(timestamp));
 
-
-    clockid_t clockid = 0;
-    struct timespec ts_0 = {0};
-    struct timespec ts_1 = {0};
-    struct timespec ts_result = {0};
-
-    clock_getcpuclockid(0, &clockid);
-    clock_gettime(clockid, &ts_0);
-    clock_gettime(clockid, &ts_1);
-    ts_result.tv_sec = ts_1.tv_sec - ts_0.tv_sec;
-    ts_result.tv_nsec = ts_1.tv_nsec - ts_0.tv_nsec;
 */
 
 #pragma endregion
