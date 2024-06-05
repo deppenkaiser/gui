@@ -56,7 +56,6 @@ void gui_drawing_area_destroy(GtkDrawingArea* drawing_area)
 {
 	free(_gui_drawing_area_get_core(drawing_area));
 	g_object_set_data(G_OBJECT(drawing_area), "core", NULL);
-	g_object_unref(G_OBJECT(drawing_area));
 }
 
 drawing_area_t _gui_drawing_area_get_core(GtkDrawingArea* drawing_area)

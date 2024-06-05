@@ -30,7 +30,6 @@ void gui_text_destroy(GtkText* text)
 {
 	free(_gui_text_get_core(text));
 	g_object_set_data(G_OBJECT(text), "core", NULL);
-	g_object_unref(G_OBJECT(text));
 }
 
 gui_text_t _gui_text_get_core(GtkText* text)

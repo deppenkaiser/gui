@@ -145,12 +145,10 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	return main_window;
 }
 
-// must not be called if the window is closed by the user
 void gui_main_window_destroy(GtkWidget* main_window)
 {
 	free(_gui_main_window_get_core(main_window));
 	g_object_set_data(G_OBJECT(main_window), "core", NULL);
-	g_object_unref(G_OBJECT(main_window));
 }
 
 GMenu* gui_main_window_create_sub_menu(GMenu* menu_bar, const char* sub_menu_name)

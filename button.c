@@ -41,7 +41,6 @@ void button_destroy(GtkButton* button)
 {
 	free(_button_get_core(button));
 	g_object_set_data(G_OBJECT(button), "core", NULL);
-	g_object_unref(G_OBJECT(button));
 }
 
 button_t _button_get_core(GtkButton* button)
