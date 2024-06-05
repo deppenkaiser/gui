@@ -4,7 +4,7 @@ extern void gui_drawing_area_callback(drawing_area_event_type_t type, drawing_ar
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
 
-drawing_area_t _gui_drawing_area_get_core(GtkDrawingArea* drawing_area);
+drawing_area_t _gui_drawing_area_get_core(GtkWidget* drawing_area);
 
 void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, int width, int height, gpointer user_data)
 {
@@ -52,13 +52,13 @@ GtkWidget* gui_drawing_area_create(uint32_t id, uint32_t width, uint32_t height,
     return drawing_area;
 }
 
-void gui_drawing_area_destroy(GtkDrawingArea* drawing_area)
+void gui_drawing_area_destroy(GtkWidget* drawing_area)
 {
 	free(_gui_drawing_area_get_core(drawing_area));
 	g_object_set_data(G_OBJECT(drawing_area), "core", NULL);
 }
 
-drawing_area_t _gui_drawing_area_get_core(GtkDrawingArea* drawing_area)
+drawing_area_t _gui_drawing_area_get_core(GtkWidget* drawing_area)
 {
 	return (drawing_area_t) g_object_get_data(G_OBJECT(drawing_area), "core");
 }

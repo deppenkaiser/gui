@@ -12,15 +12,15 @@ GtkWidget* gui_box_horizontal_create(uint32_t spacing)
 	return box;
 }
 
-void gui_box_append_widget(GtkBox* box, GtkWidget* widget)
+void gui_box_append_widget(GtkWidget* box, GtkWidget* widget)
 {
-    gtk_box_append(box, widget);
+    gtk_box_append(GTK_BOX(box), widget);
 }
 
-void gui_box_append_widgets(GtkBox* box, widget_array_t widgets, uint32_t count)
+void gui_box_append_widgets(GtkWidget* box, widget_array_t widgets, uint32_t count)
 {
     for (uint32_t i = 0; i < count; ++i)
     {
-        gtk_box_append(box, widgets[i]);
+        gtk_box_append(GTK_BOX(box), widgets[i]);
     }
 }
