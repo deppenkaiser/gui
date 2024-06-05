@@ -10,4 +10,3 @@ typedef struct _gui_text
 } *gui_text_t;
 
 GtkWidget* gui_text_create(uint32_t id, float alignment, void* user_data);
-void gui_text_destroy(GtkText* text);

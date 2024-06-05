@@ -1,10 +1,9 @@
 #include "text.h"
+#include "gui.h"
 
 extern void gui_text_callback(GtkEntryBuffer* buffer, gui_text_t data) __attribute__((weak));
 
-gui_text_t _gui_text_get_core(GtkText* text);
-
-void _text_changed(GtkEditable* self, gpointer user_data)
+void _gui_text_changed(GtkEditable* self, gpointer user_data)
 {
     gui_text_t data = (gui_text_t) user_data;
     if (gui_text_callback != NULL)
@@ -18,21 +17,28 @@ GtkWidget* gui_text_create(uint32_t id, float alignment, void* user_data)
     GtkWidget* text = gtk_text_new();
 	g_object_set_data(G_OBJECT(text), "core", malloc(sizeof(struct _gui_text)));
     gtk_editable_set_alignment(GTK_EDITABLE(text), alignment);
-    gui_text_t core = _gui_text_get_core(GTK_TEXT(text));
+    gui_text_t core = gui_get_core(text);
     core->text = text;
     core->id = id;
     core->user_data = user_data;
-    g_signal_connect(GTK_EDITABLE(text), "changed", G_CALLBACK(_text_changed), core);
+    g_signal_connect(GTK_EDITABLE(text), "changed", G_CALLBACK(_gui_text_changed), core);
     return text;
 }
 
-void gui_text_destroy(GtkText* text)
+/*
+void gui_text_callback(GtkEntryBuffer* buffer, gui_text_t data)
 {
-	free(_gui_text_get_core(text));
-	g_object_set_data(G_OBJECT(text), "core", NULL);
-}
+    skyview_application_data_t ad = (skyview_application_data_t) data->user_data;
+    const char* string = gtk_entry_buffer_get_text(buffer);
+    int32_t index = strlen(string) - 1;
 
-gui_text_t _gui_text_get_core(GtkText* text)
-{
-	return (gui_text_t) g_object_get_data(G_OBJECT(text), "core");
+    if (index >= 0)
+    {
+        bool delete_char = (isdigit(string[index]) == 0) && (string[index] != ',');
+        if (delete_char)
+        {
+            gtk_entry_buffer_delete_text(buffer, index, 1);
+        }
+    }
 }
+*/

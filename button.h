@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gtk-4.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 
 typedef struct _button
 {
@@ -11,4 +11,3 @@ typedef struct _button
 
 GtkWidget* button_create(uint32_t id, void* user_data);
 GtkWidget* button_with_label_create(uint32_t id, const char* label, void* user_data);
-void button_destroy(GtkButton* button);

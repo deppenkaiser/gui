@@ -38,4 +38,3 @@ typedef union _drawing_area_event
 } *drawing_area_event_t;
 
 GtkWidget* gui_drawing_area_create(uint32_t id, uint32_t width, uint32_t height, void* user_data);
-void gui_drawing_area_destroy(GtkWidget* drawing_area);

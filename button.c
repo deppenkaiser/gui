@@ -1,8 +1,7 @@
 #include "button.h"
+#include "gui.h"
 
 extern void button_callback(button_t data) __attribute__((weak));
-
-button_t _button_get_core(GtkButton* button);
 
 void _button_clicked(GtkButton* self, gpointer user_data)
 {
@@ -17,7 +16,7 @@ GtkWidget* button_create(uint32_t id, void* user_data)
 {
     GtkWidget* button = gtk_button_new();
 	g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _button)));
-    button_t core = _button_get_core(GTK_BUTTON(button));
+    button_t core = gui_get_core(GTK_BUTTON(button));
     core->button = button;
     core->id = id;
     core->user_data = user_data;
@@ -35,15 +34,4 @@ GtkWidget* button_with_label_create(uint32_t id, const char* label, void* user_d
     core->user_data = user_data;
     g_signal_connect(button, "clicked", G_CALLBACK(_button_clicked), core);
     return button;
-}
-
-void button_destroy(GtkButton* button)
-{
-	free(_button_get_core(button));
-	g_object_set_data(G_OBJECT(button), "core", NULL);
-}
-
-button_t _button_get_core(GtkButton* button)
-{
-	return (button_t) g_object_get_data(G_OBJECT(button), "core");
 }
