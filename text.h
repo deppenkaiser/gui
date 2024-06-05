@@ -2,12 +2,12 @@
 
 #include <gtk/gtk.h>
 
-typedef struct _text
+typedef struct _gui_text
 {
     GtkWidget* text;
     uint32_t id;
     void* user_data;
-} *text_t;
+} *gui_text_t;
 
-GtkWidget* text_create(uint32_t id, float alignment, void* user_data);
-void text_destroy(GtkText* text);
+GtkWidget* gui_text_create(uint32_t id, float alignment, void* user_data);
+void gui_text_destroy(GtkText* text);
