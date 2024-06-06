@@ -31,7 +31,7 @@ void _gui_button_toggled(GtkToggleButton* self, gpointer user_data)
 
 /*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
-GtkWidget* button_create(uint32_t id, gui_button_configuration_t configuration, void* user_data)
+GtkWidget* gui_button_create(uint32_t id, gui_button_configuration_t configuration, void* user_data)
 {
     GtkWidget* button = NULL;
     GCallback callback = NULL;

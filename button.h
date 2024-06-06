@@ -1,6 +1,8 @@
 #pragma once
 
 #include <gtk/gtk.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef struct _gui_button
 {
