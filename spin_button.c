@@ -1,15 +1,15 @@
 #include "spin_button.h"
 #include "gui.h"
 
-extern void gui_spin_button_callback(gui_spin_button_t data) __attribute__((weak));
+extern void gui_spin_button_callback(gui_spin_button_t core) __attribute__((weak));
 
 void _gui_spin_button_value_changed(GtkSpinButton* self, gpointer user_data)
 {
-    gui_spin_button_t data = (gui_spin_button_t) user_data;
+    gui_spin_button_t core = (gui_spin_button_t) user_data;
 
     if (gui_spin_button_callback != NULL)
     {
-        gui_spin_button_callback(data);
+        gui_spin_button_callback(core);
     }
 }
 

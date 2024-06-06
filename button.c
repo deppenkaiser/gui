@@ -1,25 +1,31 @@
 #include "button.h"
 #include "gui.h"
 
-extern void gui_button_callback(gui_button_t data) __attribute__((weak));
+extern void gui_button_callback(gui_button_t core, gui_event_t e) __attribute__((weak));
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
 
 void _gui_button_clicked(GtkButton* self, gpointer user_data)
 {
-    gui_button_t data = (gui_button_t) user_data;
+    gui_button_t core = (gui_button_t) user_data;
     if (gui_button_callback != NULL)
     {
-        gui_button_callback(data);
+        struct gui_event e = {0};
+        e.type = GE_B_CLICKED;
+        gui_button_callback(core, &e);
     }
 }
 
-void _gui_button_toggled(GtkButton* self, gpointer user_data)
+void _gui_button_toggled(GtkToggleButton* self, gpointer user_data)
 {
-    gui_button_t data = (gui_button_t) user_data;
+    gui_button_t core = (gui_button_t) user_data;
     if (gui_button_callback != NULL)
     {
-        gui_button_callback(data);
+        struct gui_event e = {0};
+        e.type = GE_B_TOGGLED;
+        e.data.b_toggled.button = self;
+        e.data.b_toggled.active = gtk_toggle_button_get_active(self);
+        gui_button_callback(core, &e);
     }
 }
 

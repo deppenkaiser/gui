@@ -5,7 +5,9 @@
 typedef enum
 {
 	GE_DA_DRAW,
-	GE_DA_MOUSE_CLICK_LEFT
+	GE_DA_MOUSE_CLICK_LEFT,
+	GE_B_CLICKED,
+	GE_B_TOGGLED
 } gui_event_type_t;
 
 typedef struct _gui_da_draw_event
@@ -24,10 +26,23 @@ typedef struct _gui_da_mouse_left_click_event
 	uint32_t n;
 } *gui_da_mouse_left_click_event_t;
 
+typedef struct _gui_b_clicked_event
+{
+	GtkButton* button;
+} *gui_b_clicked_event_t;
+
+typedef struct _gui_b_toggled_event
+{
+	GtkToggleButton* button;
+	bool active;
+} *gui_b_toggled_event_t;
+
 typedef union _gui_event_data
 {
 	struct _gui_da_draw_event da_draw;
-	struct _gui_da_mouse_left_click_event da_mouse_left_click_event;
+	struct _gui_da_mouse_left_click_event da_mouse_left_click;
+	struct _gui_b_clicked_event b_clicked;
+	struct _gui_b_toggled_event b_toggled;
 } *gui_event_data_t;
 
 typedef struct gui_event

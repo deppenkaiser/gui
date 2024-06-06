@@ -27,10 +27,10 @@ void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press,
 		gui_drawing_area_t core = (gui_drawing_area_t) user_data;
 		struct gui_event e = {0};
 		e.type = GE_DA_MOUSE_CLICK_LEFT;
-		e.data.da_mouse_left_click_event.drawing_area = GTK_DRAWING_AREA(core->drawing_area);
-		e.data.da_mouse_left_click_event.x = x;
-		e.data.da_mouse_left_click_event.y = y;
-		e.data.da_mouse_left_click_event.n = n_press;
+		e.data.da_mouse_left_click.drawing_area = GTK_DRAWING_AREA(core->drawing_area);
+		e.data.da_mouse_left_click.x = x;
+		e.data.da_mouse_left_click.y = y;
+		e.data.da_mouse_left_click.n = n_press;
 		gui_drawing_area_callback(core, &e);
 	}
 }
