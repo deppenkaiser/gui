@@ -1,37 +1,52 @@
 #include "button.h"
 #include "gui.h"
 
-extern void button_callback(button_t data) __attribute__((weak));
+extern void gui_button_callback(gui_button_t data) __attribute__((weak));
 
-void _button_clicked(GtkButton* self, gpointer user_data)
+/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
+
+void _gui_button_clicked(GtkButton* self, gpointer user_data)
 {
-    button_t data = (button_t) user_data;
-    if (button_callback != NULL)
+    gui_button_t data = (gui_button_t) user_data;
+    if (gui_button_callback != NULL)
     {
-        button_callback(data);
+        gui_button_callback(data);
     }
 }
 
-GtkWidget* button_create(uint32_t id, void* user_data)
+void _gui_button_toggled(GtkButton* self, gpointer user_data)
 {
-    GtkWidget* button = gtk_button_new();
-	g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _button)));
-    button_t core = gui_get_core(GTK_BUTTON(button));
-    core->button = button;
-    core->id = id;
-    core->user_data = user_data;
-    g_signal_connect(button, "clicked", G_CALLBACK(_button_clicked), core);
-    return button;
+    gui_button_t data = (gui_button_t) user_data;
+    if (gui_button_callback != NULL)
+    {
+        gui_button_callback(data);
+    }
 }
 
-GtkWidget* button_with_label_create(uint32_t id, const char* label, void* user_data)
+/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
+
+GtkWidget* button_create(uint32_t id, gui_button_configuration_t configuration, void* user_data)
 {
-    GtkWidget* button = gtk_button_new_with_label(label);
-	g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _button)));
-    button_t core = _button_get_core(GTK_BUTTON(button));
+    GtkWidget* button = NULL;
+    GCallback callback = NULL;
+
+    if (configuration->toggle)
+    {
+        button = configuration->label != NULL ? gtk_toggle_button_new_with_label(configuration->label) : gtk_toggle_button_new();
+        callback = G_CALLBACK(_gui_button_toggled);        
+    }
+    else
+    {
+        button = configuration->label != NULL ? gtk_button_new_with_label(configuration->label) : gtk_button_new();
+        callback = G_CALLBACK(_gui_button_clicked);
+    }
+
+    g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _gui_button)));
+    gui_button_t core = gui_get_core(button);
     core->button = button;
     core->id = id;
     core->user_data = user_data;
-    g_signal_connect(button, "clicked", G_CALLBACK(_button_clicked), core);
+    g_signal_connect(button, configuration->toggle ? "toggled" : "clicked", callback, core);
+
     return button;
 }
