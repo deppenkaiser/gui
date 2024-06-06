@@ -6,7 +6,6 @@
 #include "frame.h"
 #include "box.h"
 #include "text.h"
-#include "spin_button.h"
 #include "button.h"
 #include "events.h"
 
