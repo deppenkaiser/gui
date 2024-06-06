@@ -1,22 +1,22 @@
 #include "drawing_area.h"
+#include "gui.h"
 
-extern void gui_drawing_area_callback(drawing_area_event_type_t type, drawing_area_t data, drawing_area_event_t e) __attribute__((weak));
+extern void gui_drawing_area_callback(gui_drawing_area_t core, gui_event_t e) __attribute__((weak));
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
-
-drawing_area_t _gui_drawing_area_get_core(GtkDrawingArea* drawing_area);
 
 void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, int width, int height, gpointer user_data)
 {
 	if (gui_drawing_area_callback != NULL)
 	{
-		drawing_area_t data = (drawing_area_t) user_data;
-		union _drawing_area_event e = {0};
-		e.draw.drawing_area = drawing_area;
-		e.draw.width = width;
-		e.draw.height = height;
-		e.draw.cr = cr;
-		gui_drawing_area_callback(DAE_DRAW, data, &e);
+		gui_drawing_area_t core = (gui_drawing_area_t) user_data;
+		struct gui_event e = {0};
+		e.type = GE_DA_DRAW;
+		e.data.da_draw.drawing_area = drawing_area;
+		e.data.da_draw.width = width;
+		e.data.da_draw.height = height;
+		e.data.da_draw.cr = cr;
+		gui_drawing_area_callback(core, &e);
 	}
 }
 
@@ -24,13 +24,14 @@ void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press,
 {
 	if (gui_drawing_area_callback != NULL)
 	{
-		drawing_area_t data = (drawing_area_t) user_data;
-		union _drawing_area_event e = {0};
-		e.mouse_left_click_event.drawing_area = GTK_DRAWING_AREA(data->drawing_area);
-		e.mouse_left_click_event.x = x;
-		e.mouse_left_click_event.y = y;
-		e.mouse_left_click_event.n = n_press;
-		gui_drawing_area_callback(DAE_MOUSE_CLICK_LEFT, data, &e);
+		gui_drawing_area_t core = (gui_drawing_area_t) user_data;
+		struct gui_event e = {0};
+		e.type = GE_DA_MOUSE_CLICK_LEFT;
+		e.data.da_mouse_left_click_event.drawing_area = GTK_DRAWING_AREA(core->drawing_area);
+		e.data.da_mouse_left_click_event.x = x;
+		e.data.da_mouse_left_click_event.y = y;
+		e.data.da_mouse_left_click_event.n = n_press;
+		gui_drawing_area_callback(core, &e);
 	}
 }
 
@@ -39,8 +40,8 @@ void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press,
 GtkWidget* gui_drawing_area_create(uint32_t id, uint32_t width, uint32_t height, void* user_data)
 {
     GtkWidget* drawing_area = gtk_drawing_area_new();
-	g_object_set_data(G_OBJECT(drawing_area), "core", malloc(sizeof(struct drawing_area)));
-	drawing_area_t core = _gui_drawing_area_get_core(GTK_DRAWING_AREA(drawing_area));
+	g_object_set_data(G_OBJECT(drawing_area), "core", malloc(sizeof(struct gui_drawing_area)));
+	gui_drawing_area_t core = gui_get_core(drawing_area);
 	core->drawing_area = drawing_area;
 	core->id = id;
 	core->user_data = user_data;
@@ -50,16 +51,4 @@ GtkWidget* gui_drawing_area_create(uint32_t id, uint32_t width, uint32_t height,
     gtk_widget_add_controller(GTK_WIDGET(drawing_area), GTK_EVENT_CONTROLLER(mouse_click));
     g_signal_connect(GTK_GESTURE(mouse_click), "pressed", G_CALLBACK(_gui_drawing_area_mouse_button_pressed), core);
     return drawing_area;
-}
-
-void gui_drawing_area_destroy(GtkDrawingArea* drawing_area)
-{
-	free(_gui_drawing_area_get_core(drawing_area));
-	g_object_set_data(G_OBJECT(drawing_area), "core", NULL);
-	g_object_unref(G_OBJECT(drawing_area));
-}
-
-drawing_area_t _gui_drawing_area_get_core(GtkDrawingArea* drawing_area)
-{
-	return (drawing_area_t) g_object_get_data(G_OBJECT(drawing_area), "core");
 }

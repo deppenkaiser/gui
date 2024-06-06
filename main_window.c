@@ -1,4 +1,5 @@
 #include "main_window.h"
+#include "gui.h"
 
 #include <string/string.h>
 #include <logging/logging.h>
@@ -12,7 +13,6 @@ extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVaria
 
 GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindow* window);
 void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t data);
-gui_main_window_t _gui_main_window_get_core(GtkWidget* main_window);
 
 gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
@@ -78,11 +78,6 @@ GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindo
     return menu_bar;
 }
 
-gui_main_window_t _gui_main_window_get_core(GtkWidget* main_window)
-{
-	return (gui_main_window_t) g_object_get_data(G_OBJECT(main_window), "core");
-}
-
 #pragma endregion
 
 /*------------------------------------------------- PUBLIC ------------------------------------------------------*/
@@ -94,7 +89,7 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 {
 	GtkWidget* main_window = gtk_application_window_new(app);
 	g_object_set_data(G_OBJECT(main_window), "core", malloc(sizeof(struct gui_main_window)));
-	gui_main_window_t core = _gui_main_window_get_core(main_window);
+	gui_main_window_t core = gui_get_core(main_window);
 	core->main_window = main_window;
 	core->user_data = user_data;
 	core->app = app;
@@ -143,14 +138,6 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	}
 
 	return main_window;
-}
-
-// must not be called if the window is closed by the user
-void gui_main_window_destroy(GtkWidget* main_window)
-{
-	free(_gui_main_window_get_core(main_window));
-	g_object_set_data(G_OBJECT(main_window), "core", NULL);
-	g_object_unref(G_OBJECT(main_window));
 }
 
 GMenu* gui_main_window_create_sub_menu(GMenu* menu_bar, const char* sub_menu_name)
