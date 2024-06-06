@@ -16,15 +16,6 @@ typedef struct gui_main_window
 	void* user_data;
 } *gui_main_window_t;
 
-typedef enum mwe_types
-{
-	MWE_BEFORE_PRESENT,
-	MWE_AFTER_PRESENT,
-	MWE_CLOSE_REQUEST,
-	MWE_KEY_PRESSED,
-	MWE_KEY_RELEASED
-} mwe_types_t;
-
 typedef struct mwe_before_present
 {
 	uint32_t dummy;
@@ -63,4 +54,4 @@ typedef union main_window_event
 GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data,
 	bool show_menu, bool resizeable);
 GMenu* gui_main_window_create_sub_menu(GMenu* menu_bar, const char* sub_menu_name);
-void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, const char* action_name, gui_main_window_t data);
+void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, const char* action_name, gui_main_window_t core);

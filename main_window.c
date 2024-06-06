@@ -4,15 +4,15 @@
 #include <string/string.h>
 #include <logging/logging.h>
 
-extern void gui_main_window_callback(mwe_types_t type, gui_main_window_t data, main_window_event_t e) __attribute__((weak));
-extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t data) __attribute__((weak));
+extern void gui_main_window_callback(gui_event_type_t type, gui_main_window_t core, main_window_event_t e) __attribute__((weak));
+extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t core) __attribute__((weak));
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
 
 #pragma region private
 
 GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindow* window);
-void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t data);
+void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t core);
 
 gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
@@ -22,7 +22,7 @@ gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval,
 		union main_window_event e = {0};
 		e.key_pressed.keyval = keyval;
 		logging_log_message("key pressed event begin...", true);
-		gui_main_window_callback(MWE_KEY_PRESSED, (gui_main_window_t) user_data, &e);
+		gui_main_window_callback(GE_KEY_PRESSED, (gui_main_window_t) user_data, &e);
 		logging_log_message("key pressed event end...", true);
 		handled = e.key_pressed.handled;
 	}
@@ -36,7 +36,7 @@ void _gui_main_window_key_released(GtkEventControllerKey* self, guint keyval, gu
 		union main_window_event e = {0};
 		e.key_released.keyval = keyval;
 		logging_log_message("key released event begin...", true);
-		gui_main_window_callback(MWE_KEY_RELEASED, (gui_main_window_t) user_data, &e);
+		gui_main_window_callback(GE_KEY_RELEASED, (gui_main_window_t) user_data, &e);
 		logging_log_message("key released event end...", true);
 	}
 }
@@ -47,7 +47,7 @@ gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_data)
 	if (gui_main_window_callback != NULL)
 	{
 		union main_window_event e = {0};
-		gui_main_window_callback(MWE_CLOSE_REQUEST, (gui_main_window_t) user_data, &e);
+		gui_main_window_callback(GE_CLOSE_REQUEST, (gui_main_window_t) user_data, &e);
 		close = e.close_request.close;
 	}
     return close;
@@ -63,11 +63,11 @@ void _gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* pa
 	}
 }
 
-void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t data)
+void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t core)
 {
     GSimpleAction* action = g_simple_action_new(action_name, NULL);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(action));
-    g_signal_connect(action, "activate", G_CALLBACK(_gui_main_window_action_callback), data);
+    g_signal_connect(action, "activate", G_CALLBACK(_gui_main_window_action_callback), core);
 }
 
 GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindow* window)
@@ -120,7 +120,7 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	{
 		union main_window_event e = {0};
 		logging_log_message("main window design phase begin.", true);
-		gui_main_window_callback(MWE_BEFORE_PRESENT, core, &e);
+		gui_main_window_callback(GE_BEFORE_PRESENT, core, &e);
 		logging_log_message("main window design phase end.", true);
 	}
 
@@ -133,7 +133,7 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	{
 		union main_window_event e = {0};
 		logging_log_message("main window initializing phase begin.", true);
-		gui_main_window_callback(MWE_AFTER_PRESENT, core, &e);
+		gui_main_window_callback(GE_AFTER_PRESENT, core, &e);
 		logging_log_message("main window initializing phase end.", true);
 	}
 
@@ -147,7 +147,7 @@ GMenu* gui_main_window_create_sub_menu(GMenu* menu_bar, const char* sub_menu_nam
     return sub_menu;
 }
 
-void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, const char* action, gui_main_window_t data)
+void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, const char* action, gui_main_window_t core)
 {
 	string_t action_name = {0};
 	snprintf(action_name, sizeof(string_t), "app.%s", action);
@@ -155,7 +155,7 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
     GMenuItem* menu_item_exit = g_menu_item_new(item_name, action_name);
     g_menu_append_item(sub_menu, menu_item_exit);
 
-	_gui_main_window_add_action(data->app, action, data);
+	_gui_main_window_add_action(core->app, action, core);
 }
 
 #pragma endregion
