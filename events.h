@@ -18,6 +18,32 @@ typedef enum
 	GE_B_TOGGLED
 } gui_event_type_t;
 
+typedef struct _gui_before_present
+{
+	uint32_t dummy;
+} *gui_before_present_t;
+
+typedef struct _gui_after_present
+{
+	uint32_t dummy;
+} *gui_after_present_t;
+
+typedef struct _gui_close_request
+{
+	bool close;
+} *gui_close_request_t;
+
+typedef struct _gui_key_pressed
+{
+	uint32_t keyval;
+	bool handled;
+} *gui_key_pressed_t;
+
+typedef struct _gui_key_released
+{
+	uint32_t keyval;
+} *gui_key_released_t;
+
 typedef struct _gui_da_draw_event
 {
 	GtkDrawingArea* drawing_area;
@@ -47,6 +73,11 @@ typedef struct _gui_b_toggled_event
 
 typedef union _gui_event_data
 {
+	struct _gui_before_present before_present;
+	struct _gui_after_present after_present;
+	struct _gui_close_request close_request;
+	struct _gui_key_pressed key_pressed;
+	struct _gui_key_released key_released;
 	struct _gui_da_draw_event da_draw;
 	struct _gui_da_mouse_left_click_event da_mouse_left_click;
 	struct _gui_b_clicked_event b_clicked;

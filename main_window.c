@@ -4,7 +4,7 @@
 #include <string/string.h>
 #include <logging/logging.h>
 
-extern void gui_main_window_callback(gui_event_type_t type, gui_main_window_t core, main_window_event_t e) __attribute__((weak));
+extern void gui_main_window_callback(gui_main_window_t core, gui_event_t e) __attribute__((weak));
 extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t core) __attribute__((weak));
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
@@ -19,12 +19,13 @@ gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval,
     gboolean handled = FALSE;
 	if (gui_main_window_callback != NULL)
 	{
-		union main_window_event e = {0};
-		e.key_pressed.keyval = keyval;
+		struct gui_event e = {0};
+		e.type = GE_KEY_PRESSED;
+		e.data.key_pressed.keyval = keyval;
 		logging_log_message("key pressed event begin...", true);
-		gui_main_window_callback(GE_KEY_PRESSED, (gui_main_window_t) user_data, &e);
+		gui_main_window_callback((gui_main_window_t) user_data, &e);
 		logging_log_message("key pressed event end...", true);
-		handled = e.key_pressed.handled;
+		handled = e.data.key_pressed.handled;
 	}
     return handled;
 }
@@ -33,10 +34,11 @@ void _gui_main_window_key_released(GtkEventControllerKey* self, guint keyval, gu
 {
 	if (gui_main_window_callback != NULL)
 	{
-		union main_window_event e = {0};
-		e.key_released.keyval = keyval;
+		struct gui_event e = {0};
+		e.type = GE_KEY_RELEASED;
+		e.data.key_released.keyval = keyval;
 		logging_log_message("key released event begin...", true);
-		gui_main_window_callback(GE_KEY_RELEASED, (gui_main_window_t) user_data, &e);
+		gui_main_window_callback((gui_main_window_t) user_data, &e);
 		logging_log_message("key released event end...", true);
 	}
 }
@@ -46,9 +48,10 @@ gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_data)
 	gboolean close = FALSE;
 	if (gui_main_window_callback != NULL)
 	{
-		union main_window_event e = {0};
-		gui_main_window_callback(GE_CLOSE_REQUEST, (gui_main_window_t) user_data, &e);
-		close = e.close_request.close;
+		struct gui_event e = {0};
+		e.type = GE_CLOSE_REQUEST;
+		gui_main_window_callback((gui_main_window_t) user_data, &e);
+		close = e.data.close_request.close;
 	}
     return close;
 }
@@ -118,9 +121,10 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 
 	if (gui_main_window_callback != NULL)
 	{
-		union main_window_event e = {0};
+		struct gui_event e = {0};
+		e.type = GE_BEFORE_PRESENT;
 		logging_log_message("main window design phase begin.", true);
-		gui_main_window_callback(GE_BEFORE_PRESENT, core, &e);
+		gui_main_window_callback(core, &e);
 		logging_log_message("main window design phase end.", true);
 	}
 
@@ -131,9 +135,10 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 
 	if (gui_main_window_callback != NULL)
 	{
-		union main_window_event e = {0};
+		struct gui_event e = {0};
+		e.type = GE_AFTER_PRESENT;
 		logging_log_message("main window initializing phase begin.", true);
-		gui_main_window_callback(GE_AFTER_PRESENT, core, &e);
+		gui_main_window_callback(core, &e);
 		logging_log_message("main window initializing phase end.", true);
 	}
 
