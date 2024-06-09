@@ -110,7 +110,6 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	gtk_window_set_default_size(GTK_WINDOW(core->main_window), width_pix, height_pix);
 	gtk_window_set_resizable(GTK_WINDOW(core->main_window), resizeable ?  TRUE : FALSE);
 
-    //gtk_widget_add_controller(core.main_window, core.keyboard_controller);
     g_signal_connect(core->keyboard_controller, "key-pressed", G_CALLBACK(_gui_main_window_key_pressed), core);
     g_signal_connect(core->keyboard_controller, "key-released", G_CALLBACK(_gui_main_window_key_released), core);
 	#ifdef USE_GTK3
