@@ -9,5 +9,4 @@
 #include "button.h"
 #include "events.h"
 
-void gui_destroy_widget_core(GtkWidget* widget);
-void* gui_get_core(GtkWidget* widget);
+void gui_destroy_all_widget_cores();

@@ -7,7 +7,7 @@ extern void gui_application_callback(gui_event_type_t event, gui_application_t c
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
 
-void _gui_application_startup(GApplication* app, gpointer user_data)
+static void _gui_application_startup(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
@@ -17,7 +17,7 @@ void _gui_application_startup(GApplication* app, gpointer user_data)
 	}
 }
 
-void _gui_application_activate(GApplication* app, gpointer user_data)
+static void _gui_application_activate(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
@@ -27,7 +27,7 @@ void _gui_application_activate(GApplication* app, gpointer user_data)
 	}
 }
 
-void _gui_application_shutdown(GApplication* app, gpointer user_data)
+static void _gui_application_shutdown(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
