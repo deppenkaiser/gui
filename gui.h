@@ -8,5 +8,3 @@
 #include "text.h"
 #include "button.h"
 #include "events.h"
-
-void gui_destroy_all_widget_cores();

@@ -13,6 +13,7 @@ extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVaria
 
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
+extern void _gui_destroy_all_widget_cores();
 
 static gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
@@ -53,6 +54,12 @@ static gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_da
 		gui_main_window_callback((gui_main_window_t) user_data, &e);
 		close = e.data.close_request.close;
 	}
+
+	if (close == FALSE)
+	{
+		_gui_destroy_all_widget_cores();
+	}
+
     return close;
 }
 

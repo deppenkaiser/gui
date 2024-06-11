@@ -25,6 +25,29 @@ void _gui_destroy_widget_core(GtkWidget* widget)
 
 /*----------------------------------------------- PROTECTED -----------------------------------------------------*/
 
+// extern void _gui_destroy_all_widget_cores();
+void _gui_destroy_all_widget_cores()
+{
+	_gui_widgets_list_element_t entry = NULL;
+	LIST_FOREACH(entry, &_widgets_list_head, elements)
+	{
+		if (entry->widget != NULL)
+		{
+			_gui_destroy_widget_core(entry->widget);
+			entry->widget = NULL;
+		}
+	}
+
+	entry = LIST_FIRST(&_widgets_list_head);
+	while (entry != NULL)
+	{
+		_gui_widgets_list_element_t next = LIST_NEXT(entry, elements);
+		free(entry);
+		entry = next;
+	}
+	LIST_INIT(&_widgets_list_head);
+}
+
 // extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 void _gui_add_widget_to_internal_list(GtkWidget* widget)
 {
@@ -172,25 +195,3 @@ gboolean _gui_debug_event_callback(GtkEventControllerLegacy* self, GdkEvent* eve
 }
 
 /*------------------------------------------------- PUBLIC ------------------------------------------------------*/
-
-void gui_destroy_all_widget_cores()
-{
-	_gui_widgets_list_element_t entry = NULL;
-	LIST_FOREACH(entry, &_widgets_list_head, elements)
-	{
-		if (entry->widget != NULL)
-		{
-			_gui_destroy_widget_core(entry->widget);
-			entry->widget = NULL;
-		}
-	}
-
-	entry = LIST_FIRST(&_widgets_list_head);
-	while (entry != NULL)
-	{
-		_gui_widgets_list_element_t next = LIST_NEXT(entry, elements);
-		free(entry);
-		entry = next;
-	}
-	LIST_INIT(&_widgets_list_head);
-}
