@@ -2,13 +2,6 @@
 
 #include <gtk/gtk.h>
 
-typedef enum gui_application_events
-{
-	AE_STARTUP,
-	AE_ACTIVATE,
-	AE_SHUTDOWN
-} gui_application_events_t;
-
 typedef struct gui_application
 {
 	GtkApplication* app;

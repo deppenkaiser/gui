@@ -1,37 +1,38 @@
 #include "application.h"
+#include "gui.h"
 
 #include <logging/logging.h>
 
-extern void gui_application_callback(gui_application_events_t event, gui_application_t data) __attribute__((weak));
+extern void gui_application_callback(gui_event_type_t event, gui_application_t core) __attribute__((weak));
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
 
-void _gui_application_startup(GApplication* app, gpointer user_data)
+static void _gui_application_startup(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
 		logging_log_message("application startup begin.", true);
-		gui_application_callback(AE_STARTUP, (gui_application_t) user_data);
+		gui_application_callback(GE_A_STARTUP, (gui_application_t) user_data);
 		logging_log_message("application startup end.", true);
 	}
 }
 
-void _gui_application_activate(GApplication* app, gpointer user_data)
+static void _gui_application_activate(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
 		logging_log_message("application activation begin.", true);
-		gui_application_callback(AE_ACTIVATE, (gui_application_t) user_data);
+		gui_application_callback(GE_A_ACTIVATE, (gui_application_t) user_data);
 		logging_log_message("application activation end.", true);
 	}
 }
 
-void _gui_application_shutdown(GApplication* app, gpointer user_data)
+static void _gui_application_shutdown(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
 		logging_log_message("application shutdown begin.", true);
-		gui_application_callback(AE_SHUTDOWN, (gui_application_t) user_data);
+		gui_application_callback(GE_A_SHUTDOWN, (gui_application_t) user_data);
 		logging_log_message("application shutdown end.", true);
 	}
 }
