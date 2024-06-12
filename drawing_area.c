@@ -1,5 +1,5 @@
 #include "drawing_area.h"
-#include "gui.h"
+#include "events.h"
 
 extern void gui_drawing_area_callback(gui_drawing_area_t core, gui_event_t e) __attribute__((weak));
 

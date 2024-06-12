@@ -1,5 +1,5 @@
 #include "application.h"
-#include "gui.h"
+#include "events.h"
 
 #include <logging/logging.h>
 

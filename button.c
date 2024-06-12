@@ -1,5 +1,5 @@
 #include "button.h"
-#include "gui.h"
+#include "events.h"
 
 extern void gui_button_callback(gui_button_t core, gui_event_t e) __attribute__((weak));
 
@@ -98,6 +98,7 @@ GtkWidget* gui_button_spin_create(uint32_t id, gui_spin_button_configuration_t c
     GtkAdjustment* adjustment = gtk_adjustment_new(configuration->value, configuration->min, configuration->max,
         configuration->increment, 0.0, 0.0);
     GtkWidget* button = gtk_spin_button_new(adjustment, 1.0, configuration->digits);
+    gtk_editable_set_alignment(GTK_EDITABLE(button), MIN(MAX(configuration->alignment, 0.0f), 1.0));
 	g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _gui_button)));
     gui_button_t core = _gui_get_core(button);
     core->button = button;
