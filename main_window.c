@@ -1,21 +1,18 @@
 #include "main_window.h"
 #include "events.h"
 
+#include <api/api.h>
 #include <string/string.h>
 #include <logging/logging.h>
 
 extern void gui_main_window_callback(gui_main_window_t core, gui_event_t e) __attribute__((weak));
 extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t core) __attribute__((weak));
 
-/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
-
-#pragma region private
-
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 extern void _gui_destroy_all_widget_cores();
 
-static gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
+private gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
     gboolean handled = FALSE;
 	if (gui_main_window_callback != NULL)
@@ -31,7 +28,7 @@ static gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint 
     return handled;
 }
 
-static void _gui_main_window_key_released(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
+private void _gui_main_window_key_released(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
 	if (gui_main_window_callback != NULL)
 	{
@@ -44,7 +41,7 @@ static void _gui_main_window_key_released(GtkEventControllerKey* self, guint key
 	}
 }
 
-static gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_data)
+private gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_data)
 {
 	gboolean close = FALSE;
 	if (gui_main_window_callback != NULL)
@@ -63,7 +60,7 @@ static gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_da
     return close;
 }
 
-static void _gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gpointer user_data)
+private void _gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gpointer user_data)
 {
 	if (gui_main_window_action_callback != NULL)
 	{
@@ -73,26 +70,20 @@ static void _gui_main_window_action_callback(GSimpleAction* simple_action, GVari
 	}
 }
 
-static void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t core)
+private void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t core)
 {
     GSimpleAction* action = g_simple_action_new(action_name, NULL);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(action));
     g_signal_connect(action, "activate", G_CALLBACK(_gui_main_window_action_callback), core);
 }
 
-static GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindow* window)
+private GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindow* window)
 {
     GMenu* menu_bar = g_menu_new();
     gtk_application_set_menubar(app, G_MENU_MODEL(menu_bar));
     gtk_application_window_set_show_menubar(window, TRUE);
     return menu_bar;
 }
-
-#pragma endregion
-
-/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
-
-#pragma region public
 
 GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data,
 	bool show_menu, bool resizeable)
@@ -169,12 +160,6 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
 	_gui_main_window_add_action(core->app, action, core);
 }
 
-#pragma endregion
-
-/*------------------------------------------------- SAMPLES ------------------------------------------------------*/
-
-#pragma region samples
-
 /*
     ad->pipeline = cam_tis_create_pipeline_with_uri("playbin",
         "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", ad);
@@ -202,5 +187,3 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
 			framecount, pixel_data, GST_TIME_ARGS(timestamp));
 
 */
-
-#pragma endregion

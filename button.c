@@ -1,6 +1,8 @@
 #include "button.h"
 #include "events.h"
 
+#include <api/api.h>
+
 extern void gui_button_callback(gui_button_t core, gui_event_t e) __attribute__((weak));
 
 /*------------------------------------------------- PRIVATE ------------------------------------------------------*/
@@ -8,7 +10,7 @@ extern void gui_button_callback(gui_button_t core, gui_event_t e) __attribute__(
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 
-static void _gui_button_clicked(GtkButton* self, gpointer user_data)
+private void _gui_button_clicked(GtkButton* self, gpointer user_data)
 {
     gui_button_t core = (gui_button_t) user_data;
     if (gui_button_callback != NULL)
@@ -19,7 +21,7 @@ static void _gui_button_clicked(GtkButton* self, gpointer user_data)
     }
 }
 
-static void _gui_button_toggled(GtkToggleButton* self, gpointer user_data)
+private void _gui_button_toggled(GtkToggleButton* self, gpointer user_data)
 {
     gui_button_t core = (gui_button_t) user_data;
     if (gui_button_callback != NULL)
@@ -32,7 +34,7 @@ static void _gui_button_toggled(GtkToggleButton* self, gpointer user_data)
     }
 }
 
-static void _gui_button_spin_value_changed(GtkSpinButton* self, gpointer user_data)
+private void _gui_button_spin_value_changed(GtkSpinButton* self, gpointer user_data)
 {
     gui_button_t core = (gui_button_t) user_data;
 
@@ -44,7 +46,7 @@ static void _gui_button_spin_value_changed(GtkSpinButton* self, gpointer user_da
     }
 }
 
-static gboolean _gui_button_drop_down_callback(GtkEventControllerLegacy* self, GdkEvent* event, gpointer user_data)
+private gboolean _gui_button_drop_down_callback(GtkEventControllerLegacy* self, GdkEvent* event, gpointer user_data)
 {
     gboolean handled = FALSE;
     gui_button_t core = (gui_button_t) user_data;
@@ -63,8 +65,6 @@ static gboolean _gui_button_drop_down_callback(GtkEventControllerLegacy* self, G
 
     return handled;
 }
-
-/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
 GtkWidget* gui_button_create(uint32_t id, gui_button_configuration_t configuration, void* user_data)
 {

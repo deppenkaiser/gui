@@ -1,13 +1,12 @@
 #include "application.h"
 #include "events.h"
 
+#include <api/api.h>
 #include <logging/logging.h>
 
 extern void gui_application_callback(gui_event_type_t event, gui_application_t core) __attribute__((weak));
 
-/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
-
-static void _gui_application_startup(GApplication* app, gpointer user_data)
+private void _gui_application_startup(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
@@ -17,7 +16,7 @@ static void _gui_application_startup(GApplication* app, gpointer user_data)
 	}
 }
 
-static void _gui_application_activate(GApplication* app, gpointer user_data)
+private void _gui_application_activate(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
@@ -27,7 +26,7 @@ static void _gui_application_activate(GApplication* app, gpointer user_data)
 	}
 }
 
-static void _gui_application_shutdown(GApplication* app, gpointer user_data)
+private void _gui_application_shutdown(GApplication* app, gpointer user_data)
 {
 	if (gui_application_callback != NULL)
 	{
@@ -36,8 +35,6 @@ static void _gui_application_shutdown(GApplication* app, gpointer user_data)
 		logging_log_message("application shutdown end.", true);
 	}
 }
-
-/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
 int32_t gui_application_run(const char* name, int argc, char **argv, void* user_data)
 {

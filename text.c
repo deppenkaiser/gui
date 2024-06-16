@@ -1,13 +1,12 @@
 #include "text.h"
 
+#include <api/api.h>
 #include <regex.h>
-
-/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
 
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 
-static void _gui_text_changed(GtkEditable* self, gpointer user_data)
+private void _gui_text_changed(GtkEditable* self, gpointer user_data)
 {
     gui_text_t data = (gui_text_t) user_data;
     GtkEntryBuffer* buffer = gtk_text_get_buffer(GTK_TEXT(self));
@@ -28,8 +27,6 @@ static void _gui_text_changed(GtkEditable* self, gpointer user_data)
         regfree(&compiled_expression);
     }
 }
-
-/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
 GtkWidget* gui_text_create(uint32_t id, float alignment, const char* regular_expression, const char* value, void* user_data)
 {
