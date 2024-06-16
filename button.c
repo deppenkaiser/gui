@@ -3,9 +3,7 @@
 
 #include <api/api.h>
 
-extern void gui_button_callback(gui_button_t core, gui_event_t e) __attribute__((weak));
-
-/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
+callback_declaration(void, gui_button(gui_button_t core, gui_event_t e));
 
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
@@ -13,24 +11,24 @@ extern void* _gui_get_core(GtkWidget* widget);
 private void _gui_button_clicked(GtkButton* self, gpointer user_data)
 {
     gui_button_t core = (gui_button_t) user_data;
-    if (gui_button_callback != NULL)
+    if (gui_button != NULL)
     {
         struct gui_event e = {0};
         e.type = GE_B_CLICKED;
-        gui_button_callback(core, &e);
+        gui_button(core, &e);
     }
 }
 
 private void _gui_button_toggled(GtkToggleButton* self, gpointer user_data)
 {
     gui_button_t core = (gui_button_t) user_data;
-    if (gui_button_callback != NULL)
+    if (gui_button != NULL)
     {
         struct gui_event e = {0};
         e.type = GE_B_TOGGLED;
         e.data.b_toggled.button = self;
         e.data.b_toggled.active = gtk_toggle_button_get_active(self);
-        gui_button_callback(core, &e);
+        gui_button(core, &e);
     }
 }
 
@@ -38,11 +36,11 @@ private void _gui_button_spin_value_changed(GtkSpinButton* self, gpointer user_d
 {
     gui_button_t core = (gui_button_t) user_data;
 
-    if (gui_button_callback != NULL)
+    if (gui_button != NULL)
     {
         struct gui_event e = {0};
         e.type = GE_B_SELECTED;
-        gui_button_callback(core, &e);
+        gui_button(core, &e);
     }
 }
 
@@ -54,10 +52,10 @@ private gboolean _gui_button_drop_down_callback(GtkEventControllerLegacy* self, 
 	switch (gdk_event_get_event_type(event))
 	{
 		case GDK_GRAB_BROKEN:
-            if (gui_button_callback != NULL)
+            if (gui_button != NULL)
             {
                 struct gui_event e = {0};
-                gui_button_callback(core, &e);
+                gui_button(core, &e);
                 handled = TRUE;
             }
 			break;
@@ -69,17 +67,17 @@ private gboolean _gui_button_drop_down_callback(GtkEventControllerLegacy* self, 
 GtkWidget* gui_button_create(uint32_t id, gui_button_configuration_t configuration, void* user_data)
 {
     GtkWidget* button = NULL;
-    GCallback callback = NULL;
+    GCallback callback_function = NULL;
 
     if (configuration->toggle)
     {
         button = configuration->label != NULL ? gtk_toggle_button_new_with_label(configuration->label) : gtk_toggle_button_new();
-        callback = G_CALLBACK(_gui_button_toggled);        
+        callback_function = G_CALLBACK(_gui_button_toggled);        
     }
     else
     {
         button = configuration->label != NULL ? gtk_button_new_with_label(configuration->label) : gtk_button_new();
-        callback = G_CALLBACK(_gui_button_clicked);
+        callback_function = G_CALLBACK(_gui_button_clicked);
     }
 
     g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _gui_button)));
@@ -87,7 +85,7 @@ GtkWidget* gui_button_create(uint32_t id, gui_button_configuration_t configurati
     core->button = button;
     core->id = id;
     core->user_data = user_data;
-    g_signal_connect(button, configuration->toggle ? "toggled" : "clicked", callback, core);
+    g_signal_connect(button, configuration->toggle ? "toggled" : "clicked", callback_function, core);
     _gui_add_widget_to_internal_list(button);
 
     return button;

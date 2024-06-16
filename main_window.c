@@ -5,8 +5,8 @@
 #include <string/string.h>
 #include <logging/logging.h>
 
-extern void gui_main_window_callback(gui_main_window_t core, gui_event_t e) __attribute__((weak));
-extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t core) __attribute__((weak));
+callback_declaration(void, gui_main_window(gui_main_window_t core, gui_event_t e));
+callback_declaration(void, gui_main_window_action(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t core));
 
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
@@ -15,13 +15,13 @@ extern void _gui_destroy_all_widget_cores();
 private gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
     gboolean handled = FALSE;
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_KEY_PRESSED;
 		e.data.key_pressed.keyval = keyval;
 		logging_log_message("key pressed event begin...", true);
-		gui_main_window_callback((gui_main_window_t) user_data, &e);
+		gui_main_window((gui_main_window_t) user_data, &e);
 		logging_log_message("key pressed event end...", true);
 		handled = e.data.key_pressed.handled;
 	}
@@ -30,13 +30,13 @@ private gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint
 
 private void _gui_main_window_key_released(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_KEY_RELEASED;
 		e.data.key_released.keyval = keyval;
 		logging_log_message("key released event begin...", true);
-		gui_main_window_callback((gui_main_window_t) user_data, &e);
+		gui_main_window((gui_main_window_t) user_data, &e);
 		logging_log_message("key released event end...", true);
 	}
 }
@@ -44,11 +44,11 @@ private void _gui_main_window_key_released(GtkEventControllerKey* self, guint ke
 private gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_data)
 {
 	gboolean close = FALSE;
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_CLOSE_REQUEST;
-		gui_main_window_callback((gui_main_window_t) user_data, &e);
+		gui_main_window((gui_main_window_t) user_data, &e);
 		close = e.data.close_request.close;
 	}
 
@@ -62,10 +62,10 @@ private gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_d
 
 private void _gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gpointer user_data)
 {
-	if (gui_main_window_action_callback != NULL)
+	if (gui_main_window_action != NULL)
 	{
 		logging_log_message("action event begin...", true);
-		gui_main_window_action_callback(simple_action, parameter, (gui_main_window_t) user_data);
+		gui_main_window_action(simple_action, parameter, (gui_main_window_t) user_data);
 		logging_log_message("action event end...", true);
 	}
 }
@@ -116,12 +116,12 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
     g_signal_connect(core->main_window, "close-request", G_CALLBACK(_gui_main_window_close_request), core);
 	#endif
 
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_BEFORE_PRESENT;
 		logging_log_message("main window design phase begin.", true);
-		gui_main_window_callback(core, &e);
+		gui_main_window(core, &e);
 		logging_log_message("main window design phase end.", true);
 	}
 
@@ -130,12 +130,12 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	#endif
     gtk_window_present(GTK_WINDOW(core->main_window));
 
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_AFTER_PRESENT;
 		logging_log_message("main window initializing phase begin.", true);
-		gui_main_window_callback(core, &e);
+		gui_main_window(core, &e);
 		logging_log_message("main window initializing phase end.", true);
 	}
 	_gui_add_widget_to_internal_list(main_window);
