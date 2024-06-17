@@ -1,11 +1,10 @@
 #include "gui/gui.h"
 
+#include <api/api.h>
 #include <logging/logging.h>
 #include <sys/queue.h>
 
 void* _gui_get_core(GtkWidget* widget);
-
-/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
 
 typedef struct _gui_widgets_list_element
 {
@@ -15,15 +14,13 @@ typedef struct _gui_widgets_list_element
 
 LIST_HEAD(_gui_widgets_list_head, _gui_widgets_list_element);
 
-static struct _gui_widgets_list_head _widgets_list_head = {0};
+private struct _gui_widgets_list_head _widgets_list_head = {0};
 
-void _gui_destroy_widget_core(GtkWidget* widget)
+private void _gui_destroy_widget_core(GtkWidget* widget)
 {
 	free(_gui_get_core(widget));
 	g_object_set_data(G_OBJECT(widget), "core", NULL);
 }
-
-/*----------------------------------------------- PROTECTED -----------------------------------------------------*/
 
 // extern void _gui_destroy_all_widget_cores();
 void _gui_destroy_all_widget_cores()
@@ -193,5 +190,3 @@ gboolean _gui_debug_event_callback(GtkEventControllerLegacy* self, GdkEvent* eve
 
     return handled;
 }
-
-/*------------------------------------------------- PUBLIC ------------------------------------------------------*/

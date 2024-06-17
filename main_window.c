@@ -1,57 +1,54 @@
 #include "main_window.h"
-#include "gui.h"
+#include "events.h"
 
+#include <api/api.h>
 #include <string/string.h>
 #include <logging/logging.h>
 
-extern void gui_main_window_callback(gui_main_window_t core, gui_event_t e) __attribute__((weak));
-extern void gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t core) __attribute__((weak));
-
-/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
-
-#pragma region private
+callback_declaration(void, gui_main_window(gui_main_window_t core, gui_event_t e));
+callback_declaration(void, gui_main_window_action(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t core));
 
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 extern void _gui_destroy_all_widget_cores();
 
-static gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
+private gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
     gboolean handled = FALSE;
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_KEY_PRESSED;
 		e.data.key_pressed.keyval = keyval;
 		logging_log_message("key pressed event begin...", true);
-		gui_main_window_callback((gui_main_window_t) user_data, &e);
+		gui_main_window((gui_main_window_t) user_data, &e);
 		logging_log_message("key pressed event end...", true);
 		handled = e.data.key_pressed.handled;
 	}
     return handled;
 }
 
-static void _gui_main_window_key_released(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
+private void _gui_main_window_key_released(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_KEY_RELEASED;
 		e.data.key_released.keyval = keyval;
 		logging_log_message("key released event begin...", true);
-		gui_main_window_callback((gui_main_window_t) user_data, &e);
+		gui_main_window((gui_main_window_t) user_data, &e);
 		logging_log_message("key released event end...", true);
 	}
 }
 
-static gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_data)
+private gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_data)
 {
 	gboolean close = FALSE;
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_CLOSE_REQUEST;
-		gui_main_window_callback((gui_main_window_t) user_data, &e);
+		gui_main_window((gui_main_window_t) user_data, &e);
 		close = e.data.close_request.close;
 	}
 
@@ -63,36 +60,30 @@ static gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_da
     return close;
 }
 
-static void _gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gpointer user_data)
+private void _gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gpointer user_data)
 {
-	if (gui_main_window_action_callback != NULL)
+	if (gui_main_window_action != NULL)
 	{
 		logging_log_message("action event begin...", true);
-		gui_main_window_action_callback(simple_action, parameter, (gui_main_window_t) user_data);
+		gui_main_window_action(simple_action, parameter, (gui_main_window_t) user_data);
 		logging_log_message("action event end...", true);
 	}
 }
 
-static void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t core)
+private void _gui_main_window_add_action(GtkApplication* app, const char* action_name, gui_main_window_t core)
 {
     GSimpleAction* action = g_simple_action_new(action_name, NULL);
     g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(action));
     g_signal_connect(action, "activate", G_CALLBACK(_gui_main_window_action_callback), core);
 }
 
-static GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindow* window)
+private GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicationWindow* window)
 {
     GMenu* menu_bar = g_menu_new();
     gtk_application_set_menubar(app, G_MENU_MODEL(menu_bar));
     gtk_application_window_set_show_menubar(window, TRUE);
     return menu_bar;
 }
-
-#pragma endregion
-
-/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
-
-#pragma region public
 
 GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint32_t height_pix, void* user_data,
 	bool show_menu, bool resizeable)
@@ -125,12 +116,12 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
     g_signal_connect(core->main_window, "close-request", G_CALLBACK(_gui_main_window_close_request), core);
 	#endif
 
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_BEFORE_PRESENT;
 		logging_log_message("main window design phase begin.", true);
-		gui_main_window_callback(core, &e);
+		gui_main_window(core, &e);
 		logging_log_message("main window design phase end.", true);
 	}
 
@@ -139,12 +130,12 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	#endif
     gtk_window_present(GTK_WINDOW(core->main_window));
 
-	if (gui_main_window_callback != NULL)
+	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_AFTER_PRESENT;
 		logging_log_message("main window initializing phase begin.", true);
-		gui_main_window_callback(core, &e);
+		gui_main_window(core, &e);
 		logging_log_message("main window initializing phase end.", true);
 	}
 	_gui_add_widget_to_internal_list(main_window);
@@ -168,12 +159,6 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
 
 	_gui_main_window_add_action(core->app, action, core);
 }
-
-#pragma endregion
-
-/*------------------------------------------------- SAMPLES ------------------------------------------------------*/
-
-#pragma region samples
 
 /*
     ad->pipeline = cam_tis_create_pipeline_with_uri("playbin",
@@ -202,5 +187,3 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
 			framecount, pixel_data, GST_TIME_ARGS(timestamp));
 
 */
-
-#pragma endregion

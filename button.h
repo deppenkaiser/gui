@@ -19,6 +19,7 @@ typedef struct gui_button_configuration
 
 typedef struct gui_spin_button_configuration
 {
+    float alignment;
     double value;
     double min;
     double max;

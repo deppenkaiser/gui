@@ -1,16 +1,16 @@
 #include "drawing_area.h"
-#include "gui.h"
+#include "events.h"
 
-extern void gui_drawing_area_callback(gui_drawing_area_t core, gui_event_t e) __attribute__((weak));
+#include <api/api.h>
 
-/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
+callback_declaration(void, gui_drawing_area(gui_drawing_area_t core, gui_event_t e));
 
-extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
-extern void* _gui_get_core(GtkWidget* widget);
+protected_import(void, _gui_add_widget_to_internal_list(GtkWidget* widget));
+protected_import(void*, _gui_get_core(GtkWidget* widget));
 
-static void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, int width, int height, gpointer user_data)
+private void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, int width, int height, gpointer user_data)
 {
-	if (gui_drawing_area_callback != NULL)
+	if (gui_drawing_area != NULL)
 	{
 		gui_drawing_area_t core = (gui_drawing_area_t) user_data;
 		struct gui_event e = {0};
@@ -19,13 +19,13 @@ static void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, in
 		e.data.da_draw.width = width;
 		e.data.da_draw.height = height;
 		e.data.da_draw.cr = cr;
-		gui_drawing_area_callback(core, &e);
+		gui_drawing_area(core, &e);
 	}
 }
 
-static void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press, gdouble x, gdouble y, gpointer user_data)
+private void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press, gdouble x, gdouble y, gpointer user_data)
 {
-	if (gui_drawing_area_callback != NULL)
+	if (gui_drawing_area != NULL)
 	{
 		gui_drawing_area_t core = (gui_drawing_area_t) user_data;
 		struct gui_event e = {0};
@@ -34,11 +34,9 @@ static void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n
 		e.data.da_mouse_left_click.x = x;
 		e.data.da_mouse_left_click.y = y;
 		e.data.da_mouse_left_click.n = n_press;
-		gui_drawing_area_callback(core, &e);
+		gui_drawing_area(core, &e);
 	}
 }
-
-/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
 
 GtkWidget* gui_drawing_area_create(uint32_t id, uint32_t width, uint32_t height, void* user_data)
 {

@@ -1,52 +1,45 @@
 #include "text.h"
-#include "gui.h"
 
-extern void gui_text_callback(GtkEntryBuffer* buffer, gui_text_t data) __attribute__((weak));
-
-/*------------------------------------------------- PRIVATE ------------------------------------------------------*/
+#include <api/api.h>
+#include <regex.h>
 
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 
-static void _gui_text_changed(GtkEditable* self, gpointer user_data)
+private void _gui_text_changed(GtkEditable* self, gpointer user_data)
 {
     gui_text_t data = (gui_text_t) user_data;
-    if (gui_text_callback != NULL)
+    GtkEntryBuffer* buffer = gtk_text_get_buffer(GTK_TEXT(self));
+    const char* string = gtk_entry_buffer_get_text(buffer);
+    size_t string_length = strlen(string);
+    regex_t compiled_expression = {0};
+    if (regcomp(&compiled_expression, data->regular_expression, REG_EXTENDED) == 0)
     {
-        gui_text_callback(gtk_text_get_buffer(GTK_TEXT(self)), data);
+        regmatch_t pmatch[1] = {0};
+        regexec(&compiled_expression, string, 1, pmatch, 0);
+        
+        regoff_t regex_length = pmatch[0].rm_eo - pmatch[0].rm_so;
+        if (string_length != regex_length)
+        {
+            gtk_entry_buffer_delete_text(buffer, regex_length, 1);
+        }
+
+        regfree(&compiled_expression);
     }
 }
 
-/*------------------------------------------------- PUBLIC ------------------------------------------------------*/
-
-GtkWidget* gui_text_create(uint32_t id, float alignment, void* user_data)
+GtkWidget* gui_text_create(uint32_t id, float alignment, const char* regular_expression, const char* value, void* user_data)
 {
     GtkWidget* text = gtk_text_new();
 	g_object_set_data(G_OBJECT(text), "core", malloc(sizeof(struct _gui_text)));
-    gtk_editable_set_alignment(GTK_EDITABLE(text), alignment);
+    gtk_editable_set_alignment(GTK_EDITABLE(text), MIN(MAX(alignment, 0.0f), 1.0));
+    gtk_editable_set_text(GTK_EDITABLE(text), value);
     gui_text_t core = _gui_get_core(text);
     core->text = text;
+    core->regular_expression = regular_expression;
     core->id = id;
     core->user_data = user_data;
     g_signal_connect(GTK_EDITABLE(text), "changed", G_CALLBACK(_gui_text_changed), core);
     _gui_add_widget_to_internal_list(text);
     return text;
 }
-
-/*
-void gui_text_callback(GtkEntryBuffer* buffer, gui_text_t data)
-{
-    skyview_application_data_t ad = (skyview_application_data_t) data->user_data;
-    const char* string = gtk_entry_buffer_get_text(buffer);
-    int32_t index = strlen(string) - 1;
-
-    if (index >= 0)
-    {
-        bool delete_char = (isdigit(string[index]) == 0) && (string[index] != ',');
-        if (delete_char)
-        {
-            gtk_entry_buffer_delete_text(buffer, index, 1);
-        }
-    }
-}
-*/
