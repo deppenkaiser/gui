@@ -43,3 +43,10 @@ GtkWidget* gui_text_create(uint32_t id, float alignment, const char* regular_exp
     _gui_add_widget_to_internal_list(text);
     return text;
 }
+
+double gui_text_get_double(GtkWidget* text)
+{
+    GtkEntryBuffer* buffer = gtk_text_get_buffer(GTK_TEXT(text));
+    const char* string = gtk_entry_buffer_get_text(buffer);
+    return atof(string);
+}
