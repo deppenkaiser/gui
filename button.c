@@ -91,6 +91,11 @@ GtkWidget* gui_button_create(uint32_t id, gui_button_configuration_t configurati
     return button;
 }
 
+bool gui_button_toggle_is_active(GtkWidget* button_toggle)
+{
+    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button_toggle)) > 0 ? true : false;
+}
+
 GtkWidget* gui_button_spin_create(uint32_t id, gui_spin_button_configuration_t configuration, void* user_data)
 {
     GtkAdjustment* adjustment = gtk_adjustment_new(configuration->value, configuration->min, configuration->max,
