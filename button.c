@@ -127,6 +127,7 @@ void gui_button_spin_set_configuration(GtkWidget* spin_button, gui_spin_button_c
     GtkAdjustment* adjustment = gtk_adjustment_new(configuration->value, configuration->min, configuration->max,
         configuration->increment, 0.0, 0.0);
     gtk_spin_button_set_adjustment(GTK_SPIN_BUTTON(spin_button), adjustment);
+    gtk_spin_button_update(GTK_SPIN_BUTTON(spin_button));
 }
 
 GtkWidget* gui_button_drop_down_create(uint32_t id, const char* strings[], void* user_data)
