@@ -91,6 +91,11 @@ GtkWidget* gui_button_create(uint32_t id, gui_button_configuration_t configurati
     return button;
 }
 
+bool gui_button_toggle_is_active(GtkWidget* button_toggle)
+{
+    return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button_toggle)) > 0 ? true : false;
+}
+
 GtkWidget* gui_button_spin_create(uint32_t id, gui_spin_button_configuration_t configuration, void* user_data)
 {
     GtkAdjustment* adjustment = gtk_adjustment_new(configuration->value, configuration->min, configuration->max,
@@ -112,11 +117,17 @@ double gui_button_spin_get_double(GtkWidget* spin_button)
     return gtk_spin_button_get_value(GTK_SPIN_BUTTON(spin_button));
 }
 
+void gui_button_spin_set_double(GtkWidget* spin_button, double value)
+{
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin_button), value);
+}
+
 void gui_button_spin_set_configuration(GtkWidget* spin_button, gui_spin_button_configuration_t configuration)
 {
     GtkAdjustment* adjustment = gtk_adjustment_new(configuration->value, configuration->min, configuration->max,
         configuration->increment, 0.0, 0.0);
     gtk_spin_button_set_adjustment(GTK_SPIN_BUTTON(spin_button), adjustment);
+    gtk_spin_button_update(GTK_SPIN_BUTTON(spin_button));
 }
 
 GtkWidget* gui_button_drop_down_create(uint32_t id, const char* strings[], void* user_data)

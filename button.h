@@ -33,3 +33,5 @@ int32_t gui_button_drop_down_get_selection(GtkWidget* drop_down_button);
 GtkWidget* gui_button_spin_create(uint32_t id, gui_spin_button_configuration_t configuration, void* user_data);
 void gui_button_spin_set_configuration(GtkWidget* spin_button, gui_spin_button_configuration_t configuration);
 double gui_button_spin_get_double(GtkWidget* spin_button);
+void gui_button_spin_set_double(GtkWidget* spin_button, double value);
+bool gui_button_toggle_is_active(GtkWidget* button_toggle);
