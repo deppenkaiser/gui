@@ -10,9 +10,9 @@ private void _gui_application_startup(GApplication* app, gpointer user_data)
 {
 	if (gui_application != NULL)
 	{
-		logging_log_message("application startup begin.", true);
+		logging_log_message("application startup begin.");
 		gui_application(GE_A_STARTUP, (gui_application_t) user_data);
-		logging_log_message("application startup end.", true);
+		logging_log_message("application startup end.");
 	}
 }
 
@@ -20,9 +20,9 @@ private void _gui_application_activate(GApplication* app, gpointer user_data)
 {
 	if (gui_application != NULL)
 	{
-		logging_log_message("application activation begin.", true);
+		logging_log_message("application activation begin.");
 		gui_application(GE_A_ACTIVATE, (gui_application_t) user_data);
-		logging_log_message("application activation end.", true);
+		logging_log_message("application activation end.");
 	}
 }
 
@@ -30,15 +30,15 @@ private void _gui_application_shutdown(GApplication* app, gpointer user_data)
 {
 	if (gui_application != NULL)
 	{
-		logging_log_message("application shutdown begin.", true);
+		logging_log_message("application shutdown begin.");
 		gui_application(GE_A_SHUTDOWN, (gui_application_t) user_data);
-		logging_log_message("application shutdown end.", true);
+		logging_log_message("application shutdown end.");
 	}
 }
 
 int32_t gui_application_run(const char* name, int argc, char **argv, void* user_data)
 {
-    logging_log_message("Hello World!", true);
+    logging_log_message("Hello World!");
 	static struct gui_application core = {0};
 	#ifdef USE_GTK3
 	gtk_init(&argc, &argv);
@@ -52,6 +52,6 @@ int32_t gui_application_run(const char* name, int argc, char **argv, void* user_
     g_signal_connect(core.app, "shutdown", G_CALLBACK(_gui_application_shutdown), &core);
     int status = g_application_run(G_APPLICATION(core.app), argc, argv);
     g_object_unref(core.app);
-    logging_log_message("Good bye World!", true);
+    logging_log_message("Good bye World!");
 	return status;
 }
