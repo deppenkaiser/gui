@@ -20,9 +20,9 @@ private gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint
 		struct gui_event e = {0};
 		e.type = GE_KEY_PRESSED;
 		e.data.key_pressed.keyval = keyval;
-		logging_log_message("key pressed event begin...", true);
+		logging_log_message("key pressed event begin...");
 		gui_main_window((gui_main_window_t) user_data, &e);
-		logging_log_message("key pressed event end...", true);
+		logging_log_message("key pressed event end...");
 		handled = e.data.key_pressed.handled;
 	}
     return handled;
@@ -35,9 +35,9 @@ private void _gui_main_window_key_released(GtkEventControllerKey* self, guint ke
 		struct gui_event e = {0};
 		e.type = GE_KEY_RELEASED;
 		e.data.key_released.keyval = keyval;
-		logging_log_message("key released event begin...", true);
+		logging_log_message("key released event begin...");
 		gui_main_window((gui_main_window_t) user_data, &e);
-		logging_log_message("key released event end...", true);
+		logging_log_message("key released event end...");
 	}
 }
 
@@ -64,9 +64,9 @@ private void _gui_main_window_action_callback(GSimpleAction* simple_action, GVar
 {
 	if (gui_main_window_action != NULL)
 	{
-		logging_log_message("action event begin...", true);
+		logging_log_message("action event begin...");
 		gui_main_window_action(simple_action, parameter, (gui_main_window_t) user_data);
-		logging_log_message("action event end...", true);
+		logging_log_message("action event end...");
 	}
 }
 
@@ -81,7 +81,7 @@ private GMenu* _gui_main_window_create_menu_bar(GtkApplication* app, GtkApplicat
 {
     GMenu* menu_bar = g_menu_new();
     gtk_application_set_menubar(app, G_MENU_MODEL(menu_bar));
-    gtk_application_window_set_show_menubar(window, TRUE);
+    gtk_application_window_set_show_menubar(window, true);
     return menu_bar;
 }
 
@@ -120,9 +120,9 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	{
 		struct gui_event e = {0};
 		e.type = GE_BEFORE_PRESENT;
-		logging_log_message("main window design phase begin.", true);
+		logging_log_message("main window design phase begin.");
 		gui_main_window(core, &e);
-		logging_log_message("main window design phase end.", true);
+		logging_log_message("main window design phase end.");
 	}
 
 	#ifdef USE_GTK3
@@ -134,9 +134,9 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 	{
 		struct gui_event e = {0};
 		e.type = GE_AFTER_PRESENT;
-		logging_log_message("main window initializing phase begin.", true);
+		logging_log_message("main window initializing phase begin.");
 		gui_main_window(core, &e);
-		logging_log_message("main window initializing phase end.", true);
+		logging_log_message("main window initializing phase end.");
 	}
 	_gui_add_widget_to_internal_list(main_window);
 	return main_window;
@@ -165,7 +165,7 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
         "https://gstreamer.freedesktop.org/data/media/sintel_trailer-480p.webm", ad);
     if (ad->pipeline != NULL)
     {
-        logging_log_message("pipeline created.", true);
+        logging_log_message("pipeline created.");
 
         #if USE_GTK3
         GstElement* videosink = gst_element_factory_make("glsinkbin", "glsinkbin");
@@ -176,7 +176,7 @@ void gui_main_window_add_sub_menu_item(GMenu* sub_menu, const char* item_name, c
             g_object_get(gtkglsink, "widget", &ad->video_sink_widget, NULL);
             g_object_set(ad->pipeline, "video-sink", videosink, NULL);
             gtk_container_add(GTK_CONTAINER(data->main_window), ad->video_sink_widget);
-            logging_log_message("video sink widget created and added.", true);
+            logging_log_message("video sink widget created and added.");
         }
         #endif
     }
