@@ -39,4 +39,5 @@ target_include_directories(gui PRIVATE
 
 target_link_libraries(gui
     ${GTK4_LIBRARIES}
+	logging
 )
