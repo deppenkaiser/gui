@@ -50,7 +50,7 @@ GtkWidget* gui_gl_create(GtkWidget* parent, gpointer user_data)
     gui_gl_t core = _gui_get_core(gl);
 	core->gl_area = gl;
 	core->user_data = user_data;
-	gtk_gl_area_set_has_depth_buffer(GTK_GL_AREA(gl), TRUE);
+	gtk_gl_area_set_has_depth_buffer(GTK_GL_AREA(gl), FALSE);
 	g_signal_connect(gl, "render", G_CALLBACK(_gui_gl_render), core);
 	g_signal_connect(gl, "realize", G_CALLBACK(_gui_gl_realize), core);
 	gtk_window_set_child(GTK_WINDOW(parent), gl);
