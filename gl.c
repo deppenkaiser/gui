@@ -31,6 +31,8 @@ private void _gui_gl_realize(GtkGLArea *area, gpointer user_data)
 {
 	gui_gl_t core = user_data;
 
+	gtk_gl_area_make_current(area);
+
 	if (gui_gl != NULL)
 	{
         struct gui_event e = {0};
