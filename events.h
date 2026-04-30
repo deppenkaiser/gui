@@ -16,7 +16,9 @@ typedef enum
 	GE_DA_MOUSE_CLICK_LEFT,
 	GE_B_CLICKED,
 	GE_B_TOGGLED,
-	GE_B_SELECTED
+	GE_B_SELECTED,
+	GE_GL_RENDER,
+	GE_GL_REALIZE
 } gui_event_type_t;
 
 typedef struct _gui_before_present
