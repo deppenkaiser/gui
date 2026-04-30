@@ -12,6 +12,8 @@ private gboolean _gui_gl_render(GtkGLArea *area, GdkGLContext *context, gpointer
 {
 	gui_gl_t core = user_data;
 
+	gtk_gl_area_make_current(area);
+
 	if (gui_gl != NULL)
 	{
         struct gui_event e = {0};
