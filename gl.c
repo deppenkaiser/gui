@@ -56,7 +56,7 @@ private void _gui_gl_realize(GtkGLArea *area, gpointer user_data)
 	}
 }
 
-GtkWidget* gui_gl_create(GtkWidget* parent, gpointer user_data)
+GtkWidget* gui_gl_create(gpointer user_data)
 {
 	GtkWidget* gl =  gtk_gl_area_new();
     g_object_set_data(G_OBJECT(gl), "core", malloc(sizeof(struct _gui_gl)));
@@ -65,9 +65,10 @@ GtkWidget* gui_gl_create(GtkWidget* parent, gpointer user_data)
 	core->user_data = user_data;
 	core->render_tick = false;
 	gtk_gl_area_set_has_depth_buffer(GTK_GL_AREA(gl), FALSE);
+	gtk_widget_set_vexpand(gl, TRUE);
+	gtk_widget_set_hexpand(gl, TRUE);
 	g_signal_connect(gl, "render", G_CALLBACK(_gui_gl_render), core);
 	g_signal_connect(gl, "realize", G_CALLBACK(_gui_gl_realize), core);
-	gtk_window_set_child(GTK_WINDOW(parent), gl);
     _gui_add_widget_to_internal_list(gl);
 	return gl;
 }

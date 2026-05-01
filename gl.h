@@ -10,4 +10,4 @@ typedef struct _gui_gl
 	bool render_tick;
 } *gui_gl_t;
 
-GtkWidget* gui_gl_create(GtkWidget* parent, gpointer user_data);
+GtkWidget* gui_gl_create(gpointer user_data);
