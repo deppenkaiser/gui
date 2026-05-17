@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
+include_guard(GLOBAL)
 
 project(gui LANGUAGES C)
 
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 pkg_check_modules(EPOXY REQUIRED epoxy)
 
@@ -10,41 +12,49 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+add_subdirectory(
+	../logging
+	${CMAKE_BINARY_DIR}/logging_from_gui
+)
+
+add_subdirectory(
+	../threading
+	${CMAKE_BINARY_DIR}/threading_from_gui
+)
+
+add_subdirectory(
+	../string
+	${CMAKE_BINARY_DIR}/string_from_gui
+)
+
 add_library(gui STATIC)
 
 target_sources(gui PRIVATE
-    gui.c
-    button.c
-    application.c
-    main_window.c
-    drawing_area.c
-    frame.c
-    notebook.c
-    text.c
-    widget.c
-    box.c
+	gui.c
+	button.c
+	application.c
+	main_window.c
+	drawing_area.c
+	frame.c
+	notebook.c
+	text.c
+	widget.c
+	box.c
 	gl.c
 )
 
 target_include_directories(gui PUBLIC
-    ${GTK4_INCLUDE_DIRS}
-	${EPOXY_INCLUDE_DIRS}
+	${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_include_directories(gui PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/../threading
-    ${CMAKE_CURRENT_LIST_DIR}/../string
-    ${CMAKE_CURRENT_LIST_DIR}/../api
-    ${CMAKE_CURRENT_LIST_DIR}/../logging
+	${CMAKE_CURRENT_SOURCE_DIR}/../api
 )
 
 target_link_libraries(gui
-    ${GTK4_LIBRARIES}
+	PkgConfig::GTK4
 	${EPOXY_LIBRARIES}
 	logging
-)
-
-link_directories(
-	${EPOXY_LIBRARY_DIRS}
+	threading
+	string
 )
