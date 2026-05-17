@@ -27,6 +27,11 @@ add_subdirectory(
 	${CMAKE_BINARY_DIR}/string_from_gui
 )
 
+add_subdirectory(
+	../api
+	${CMAKE_BINARY_DIR}/api_from_gui
+)
+
 add_library(gui STATIC)
 
 target_sources(gui PRIVATE
@@ -48,7 +53,6 @@ target_include_directories(gui PUBLIC
 )
 
 target_include_directories(gui PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/../api
 )
 
 target_link_libraries(gui
@@ -57,4 +61,5 @@ target_link_libraries(gui
 	logging
 	threading
 	string
+	api
 )
