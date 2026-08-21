@@ -56,10 +56,12 @@ target_include_directories(gui PRIVATE
 )
 
 target_link_libraries(gui
-	PkgConfig::GTK4
-	${EPOXY_LIBRARIES}
-	logging
-	threading
-	string
-	api
+	PUBLIC
+		PkgConfig::GTK4
+		logging
+		threading
+		string
+		api
+	PRIVATE
+		${EPOXY_LIBRARIES}
 )
