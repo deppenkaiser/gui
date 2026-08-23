@@ -36,9 +36,6 @@ target_include_directories(gui PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_include_directories(gui PRIVATE
-)
-
 target_link_libraries(gui
 	PUBLIC
 		PkgConfig::GTK4
