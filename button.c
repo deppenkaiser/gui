@@ -80,6 +80,11 @@ GtkWidget* gui_button_create(uint32_t id, gui_button_configuration_t configurati
         callback_function = G_CALLBACK(_gui_button_clicked);
     }
 
+    if (configuration->tooltip != NULL)
+	{
+        gtk_widget_set_tooltip_text(button, configuration->tooltip);
+    }
+
     g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _gui_button)));
     gui_button_t core = _gui_get_core(button);
     core->button = button;
@@ -102,7 +107,13 @@ GtkWidget* gui_button_spin_create(uint32_t id, gui_spin_button_configuration_t c
         configuration->increment, 0.0, 0.0);
     GtkWidget* button = gtk_spin_button_new(adjustment, 1.0, configuration->digits);
     gtk_editable_set_alignment(GTK_EDITABLE(button), MIN(MAX(configuration->alignment, 0.0f), 1.0));
-	g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _gui_button)));
+    
+    if (configuration->tooltip != NULL)
+	{
+        gtk_widget_set_tooltip_text(button, configuration->tooltip);
+    }
+    
+    g_object_set_data(G_OBJECT(button), "core", malloc(sizeof(struct _gui_button)));
     gui_button_t core = _gui_get_core(button);
     core->button = button;
     core->id = id;
