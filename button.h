@@ -15,6 +15,7 @@ typedef struct gui_button_configuration
 {
     const char* label;
     bool toggle;
+    const char* tooltip;
 } *gui_button_configuration_t;
 
 typedef struct gui_spin_button_configuration
@@ -25,6 +26,7 @@ typedef struct gui_spin_button_configuration
     double max;
     double increment;
     uint32_t digits;
+    const char* tooltip;
 } *gui_spin_button_configuration_t;
 
 GtkWidget* gui_button_create(uint32_t id, gui_button_configuration_t configuration, void* user_data);
