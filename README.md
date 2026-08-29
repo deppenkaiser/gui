@@ -57,3 +57,7 @@ cmake --build build
 
 In ein Projekt einbinden: `add_subdirectory(../../libraries/gui …)`,
 Einbindung des Headers über den Include-Pfad `<gui/gui.h>`.
+
+## Wiki
+
+Dokumentation: [gui – GTK-Widget-Bibliothek mit App-Hooks](https://czybor.i234.me/wiki/sw-module/gui/) (Quartz-Wiki)
