@@ -6,6 +6,7 @@
 callback_declaration(void, gui_dialog(gui_dialog_t core, gui_event_t e));
 
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
+extern void _gui_remove_widget_from_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 
 private void _gui_dialog_destroy(GtkWidget* widget, gpointer user_data)
@@ -18,6 +19,7 @@ private void _gui_dialog_destroy(GtkWidget* widget, gpointer user_data)
         e.data.dialog_destroy.dialog = widget;
         gui_dialog(core, &e);
     }
+    _gui_remove_widget_from_internal_list(widget);
 }
 
 private gboolean _gui_dialog_close_request(GtkWindow* self, gpointer user_data)

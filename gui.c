@@ -30,7 +30,10 @@ void _gui_destroy_all_widget_cores()
 	{
 		if (entry->widget != NULL)
 		{
-			_gui_destroy_widget_core(entry->widget);
+			if (G_IS_OBJECT(entry->widget))
+			{
+				_gui_destroy_widget_core(entry->widget);
+			}
 			entry->widget = NULL;
 		}
 	}
@@ -51,6 +54,22 @@ void _gui_add_widget_to_internal_list(GtkWidget* widget)
 	_gui_widgets_list_element_t entry = malloc(sizeof(struct _gui_widgets_list_element));
 	entry->widget = widget;
 	LIST_INSERT_HEAD(&_widgets_list_head, entry, elements);
+}
+
+// extern void _gui_remove_widget_from_internal_list(GtkWidget* widget);
+void _gui_remove_widget_from_internal_list(GtkWidget* widget)
+{
+	_gui_widgets_list_element_t entry = NULL;
+	LIST_FOREACH(entry, &_widgets_list_head, elements)
+	{
+		if (entry->widget == widget)
+		{
+			LIST_REMOVE(entry, elements);
+			_gui_destroy_widget_core(widget);
+			entry->widget = NULL;
+			break;
+		}
+	}
 }
 
 // extern void* _gui_get_core(GtkWidget* widget);
