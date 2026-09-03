@@ -29,6 +29,8 @@ target_sources(gui PRIVATE
 	text.c
 	label.c
 	dialog.c
+	switch.c
+	separator.c
 	widget.c
 	box.c
 	gl.c

@@ -8,6 +8,8 @@
 #include "text.h"
 #include "label.h"
 #include "dialog.h"
+#include "switch.h"
+#include "separator.h"
 #include "button.h"
 #include "events.h"
 #include "gl.h"
