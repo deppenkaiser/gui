@@ -5,9 +5,9 @@
 
 typedef GtkWidget* widget_array_t[];
 
-void widget_set_name(GtkWidget* widget, const char* label);
-const char* widget_get_name(GtkWidget* widget);
+void gui_widget_set_name(GtkWidget* widget, const char* label);
+const char* gui_widget_get_name(GtkWidget* widget);
 
-void widget_set_margins(GtkWidget* widget, int start, int end, int top, int bottom);
-void widget_set_hexpand(GtkWidget* widget, bool expand);
-void widget_set_halign(GtkWidget* widget, GtkAlign alignment);
+void gui_widget_set_margins(GtkWidget* widget, int start, int end, int top, int bottom);
+void gui_widget_set_hexpand(GtkWidget* widget, bool expand);
+void gui_widget_set_halign(GtkWidget* widget, GtkAlign alignment);
