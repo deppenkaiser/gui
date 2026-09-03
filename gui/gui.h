@@ -6,6 +6,8 @@
 #include "frame.h"
 #include "box.h"
 #include "text.h"
+#include "label.h"
+#include "dialog.h"
 #include "button.h"
 #include "events.h"
 #include "gl.h"

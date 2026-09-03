@@ -27,6 +27,8 @@ target_sources(gui PRIVATE
 	frame.c
 	notebook.c
 	text.c
+	label.c
+	dialog.c
 	widget.c
 	box.c
 	gl.c
