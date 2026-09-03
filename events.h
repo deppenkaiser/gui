@@ -17,6 +17,8 @@ typedef enum
 	GE_B_CLICKED,
 	GE_B_TOGGLED,
 	GE_B_SELECTED,
+	GE_DIALOG_DESTROY,
+	GE_DIALOG_CLOSE_REQUEST,
 	GE_GL_RENDER,
 	GE_GL_REALIZE
 } gui_event_type_t;
@@ -74,6 +76,17 @@ typedef struct _gui_b_toggled_event
 	bool active;
 } *gui_b_toggled_event_t;
 
+typedef struct _gui_dialog_destroy_event
+{
+	GtkWidget* dialog;
+} *gui_dialog_destroy_event_t;
+
+typedef struct _gui_dialog_close_request_event
+{
+	GtkWidget* dialog;
+	bool close;
+} *gui_dialog_close_request_event_t;
+
 typedef union _gui_event_data
 {
 	struct _gui_before_present before_present;
@@ -85,6 +98,8 @@ typedef union _gui_event_data
 	struct _gui_da_mouse_left_click_event da_mouse_left_click;
 	struct _gui_b_clicked_event b_clicked;
 	struct _gui_b_toggled_event b_toggled;
+	struct _gui_dialog_destroy_event dialog_destroy;
+	struct _gui_dialog_close_request_event dialog_close_request;
 } *gui_event_data_t;
 
 typedef struct gui_event

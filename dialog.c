@@ -1,7 +1,38 @@
 #include "dialog.h"
+#include "events.h"
+
+#include <api/api.h>
+
+callback_declaration(void, gui_dialog(gui_dialog_t core, gui_event_t e));
 
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
+
+private void _gui_dialog_destroy(GtkWidget* widget, gpointer user_data)
+{
+    gui_dialog_t core = (gui_dialog_t) user_data;
+    if (gui_dialog != NULL)
+    {
+        struct gui_event e = {0};
+        e.type = GE_DIALOG_DESTROY;
+        e.data.dialog_destroy.dialog = widget;
+        gui_dialog(core, &e);
+    }
+}
+
+private gboolean _gui_dialog_close_request(GtkWindow* self, gpointer user_data)
+{
+    gboolean close = FALSE;
+    gui_dialog_t core = (gui_dialog_t) user_data;
+	if (gui_dialog != NULL)
+    {
+		struct gui_event e = {0};
+		e.type = GE_CLOSE_REQUEST;
+		gui_dialog(core, &e);
+		close = e.data.close_request.close;
+	}
+    return close;
+}
 
 GtkWidget* gui_dialog_create(uint32_t id, const char* title, uint32_t width, uint32_t height, void* user_data)
 {
@@ -14,6 +45,8 @@ GtkWidget* gui_dialog_create(uint32_t id, const char* title, uint32_t width, uin
     gtk_window_set_title(GTK_WINDOW(dialog), title);
     gtk_window_set_default_size(GTK_WINDOW(dialog), width, height);
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+    g_signal_connect(dialog, "destroy", G_CALLBACK(_gui_dialog_destroy), core);
+    g_signal_connect(dialog, "close-request", G_CALLBACK(_gui_dialog_close_request), core);
     _gui_add_widget_to_internal_list(dialog);
     return dialog;
 }
