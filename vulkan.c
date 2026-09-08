@@ -19,16 +19,16 @@ protected_import(void*, _gui_get_core(GtkWidget* widget));
 extern Display* gdk_x11_display_get_xdisplay(GdkDisplay* display);
 extern Window gdk_x11_surface_get_xid(GdkSurface* surface);
 
-// === Interne Struktur ===
+// === Interne Struktur (identisch mit gui_vulkan_t für Kompatibilität) ===
 typedef struct _gui_vulkan_core
 {
     GtkWidget* vulkan_area;
     VkSurfaceKHR surface;
     VkInstance instance;
     void* user_data;
+    bool initialized;
     int width;
     int height;
-    bool initialized;
     bool render_pending;
 } *_gui_vulkan_core_t;
 
