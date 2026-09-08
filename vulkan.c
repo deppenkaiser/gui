@@ -6,7 +6,7 @@
 #include <logging/logging.h>
 #include <stdlib.h>
 
-// === Protected Imports (interne Funktionen aus gui.c) ===
+// === Protected Imports ===
 protected_import(void, _gui_add_widget_to_internal_list(GtkWidget* widget));
 protected_import(void*, _gui_get_core(GtkWidget* widget));
 
@@ -22,7 +22,7 @@ typedef struct _gui_vulkan_core
     bool render_pending;
 } *_gui_vulkan_core_t;
 
-// === Callback-Deklaration (weak, überschreibbar) ===
+// === Callback-Deklaration ===
 callback_declaration(void, gui_vulkan(gui_vulkan_t core, gui_event_t e));
 
 // === Hilfsfunktionen ===
@@ -75,8 +75,8 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
     core->initialized = false;
 }
 
-// === Größenänderung (size-allocate) ===
-static void _gui_vulkan_size_allocate_callback(GtkWidget* widget, GtkAllocation* allocation, gpointer user_data)
+// === Resize (Signal "resize") ===
+static void _gui_vulkan_resize_callback(GtkWidget* widget, gpointer user_data)
 {
     _gui_vulkan_core_t core = _gui_vulkan_get_core(widget);
     if (!core) return;
@@ -84,8 +84,8 @@ static void _gui_vulkan_size_allocate_callback(GtkWidget* widget, GtkAllocation*
     int old_width = core->width;
     int old_height = core->height;
     
-    core->width = allocation->width;
-    core->height = allocation->height;
+    core->width = gtk_widget_get_width(widget);
+    core->height = gtk_widget_get_height(widget);
     
     if (gui_vulkan != NULL && (core->width != old_width || core->height != old_height))
     {
@@ -154,7 +154,7 @@ GtkWidget* gui_vulkan_create(void* user_data)
     
     g_signal_connect(drawing_area, "realize", G_CALLBACK(_gui_vulkan_realize_callback), NULL);
     g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
-    g_signal_connect(drawing_area, "size-allocate", G_CALLBACK(_gui_vulkan_size_allocate_callback), NULL);
+    g_signal_connect(drawing_area, "resize", G_CALLBACK(_gui_vulkan_resize_callback), drawing_area);
     
     _gui_add_widget_to_internal_list(drawing_area);
     
