@@ -42,7 +42,6 @@ static _gui_vulkan_core_t _gui_vulkan_get_core(GtkWidget* widget)
     {
         return NULL;
     }
-    // Verwende den generischen "core" Key, damit _gui_destroy_widget_core funktioniert
     return (_gui_vulkan_core_t) g_object_get_data(G_OBJECT(widget), "core");
 }
 
@@ -52,7 +51,6 @@ static void _gui_vulkan_set_core(GtkWidget* widget, _gui_vulkan_core_t core)
     {
         return;
     }
-    // Verwende den generischen "core" Key, damit _gui_destroy_widget_core funktioniert
     g_object_set_data(G_OBJECT(widget), "core", core);
 }
 
@@ -199,7 +197,7 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
 }
 
 // === Resize ===
-static void _gui_vulkan_resize_callback(GtkWidget* widget, gpointer user_data)
+static void _gui_vulkan_resize_callback(GtkWidget* widget, int width, int height, gpointer user_data)
 {
     _gui_vulkan_core_t core = _gui_vulkan_get_core(widget);
     if (!core)
@@ -211,13 +209,13 @@ static void _gui_vulkan_resize_callback(GtkWidget* widget, gpointer user_data)
     int old_width = core->width;
     int old_height = core->height;
 
-    core->width = gtk_widget_get_width(widget);
-    core->height = gtk_widget_get_height(widget);
+    core->width = width;
+    core->height = height;
 
-    if (core->width != old_width || core->height != old_height)
+    if (width != old_width || height != old_height)
     {
         logging_log_formatted("_gui_vulkan_resize_callback: resized from %dx%d to %dx%d",
-            old_width, old_height, core->width, core->height);
+            old_width, old_height, width, height);
 
         if (gui_vulkan != NULL)
         {
@@ -225,8 +223,8 @@ static void _gui_vulkan_resize_callback(GtkWidget* widget, gpointer user_data)
             e.type = GE_VULKAN_RESIZE;
             e.data.vulkan_resize.vulkan_area = widget;
             e.data.vulkan_resize.surface = core->surface;
-            e.data.vulkan_resize.width = core->width;
-            e.data.vulkan_resize.height = core->height;
+            e.data.vulkan_resize.width = width;
+            e.data.vulkan_resize.height = height;
             e.data.vulkan_resize.old_width = old_width;
             e.data.vulkan_resize.old_height = old_height;
             gui_vulkan((gui_vulkan_t) core, &e);
@@ -278,12 +276,13 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
 
     _gui_vulkan_set_core(drawing_area, core);
 
-    // Signale deaktiviert (für spätere Aktivierung)
-    // gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area),
-    //     _gui_vulkan_render_callback, NULL, NULL);
-    // g_signal_connect(drawing_area, "realize", G_CALLBACK(_gui_vulkan_realize_callback), NULL);
-    // g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
-    // g_signal_connect(drawing_area, "resize", G_CALLBACK(_gui_vulkan_resize_callback), drawing_area);
+    // Signale aktiviert
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area),
+        _gui_vulkan_render_callback, NULL, NULL);
+
+    g_signal_connect(drawing_area, "realize", G_CALLBACK(_gui_vulkan_realize_callback), NULL);
+    g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
+    g_signal_connect(drawing_area, "resize", G_CALLBACK(_gui_vulkan_resize_callback), NULL);
 
     _gui_add_widget_to_internal_list(drawing_area);
 
