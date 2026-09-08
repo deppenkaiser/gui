@@ -2,20 +2,29 @@
 #include "events.h"
 
 #include <api/api.h>
-#include <gdk/gdk.h>
+#include <gtk/gtk.h>
 #include <logging/logging.h>
 #include <stdlib.h>
+
+#include <xcb/xcb.h>
+#include <X11/Xlib.h>
+#include <X11/Xlib-xcb.h>
+#include <vulkan/vulkan_xcb.h>
 
 // === Protected Imports ===
 protected_import(void, _gui_add_widget_to_internal_list(GtkWidget* widget));
 protected_import(void*, _gui_get_core(GtkWidget* widget));
+
+// === Externe Deklarationen für GTK4-X11-Funktionen ===
+extern Display* gdk_x11_display_get_xdisplay(GdkDisplay* display);
+extern Window gdk_x11_surface_get_xid(GdkSurface* surface);
 
 // === Interne Struktur ===
 typedef struct _gui_vulkan_core
 {
     GtkWidget* vulkan_area;
     VkSurfaceKHR surface;
-    VkInstance instance;      // <-- NEU
+    VkInstance instance;
     void* user_data;
     int width;
     int height;
@@ -37,37 +46,68 @@ static void _gui_vulkan_set_core(GtkWidget* widget, _gui_vulkan_core_t core)
     g_object_set_data(G_OBJECT(widget), "vulkan_core", core);
 }
 
+// === X11-Hilfsfunktionen ===
+static Display* _gui_get_x11_display(void)
+{
+    GdkDisplay* display = gdk_display_get_default();
+    if (!display) return NULL;
+    return gdk_x11_display_get_xdisplay(display);
+}
+
+static Window _gui_get_x11_window(GtkWidget* widget)
+{
+    GdkSurface* surface = gtk_native_get_surface(gtk_widget_get_native(widget));
+    if (!surface) return 0;
+    return gdk_x11_surface_get_xid(surface);
+}
+
 // === Realize ===
 static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
 {
     _gui_vulkan_core_t core = _gui_vulkan_get_core(widget);
     if (!core) return;
 
-    GdkSurface* gdk_surface = gtk_native_get_surface(gtk_widget_get_native(widget));
-    if (!gdk_surface)
+    logging_log_formatted("_gui_vulkan_realize_callback: instance = %p", core->instance);
+
+    if (core->instance == VK_NULL_HANDLE)
     {
-        logging_log_message("Failed to get GdkSurface for Vulkan widget");
+        logging_log_message("ERROR: VkInstance is NULL! Cannot create surface.");
         return;
     }
 
-    // GTK4: Vulkan-Surface mit der gespeicherten Instance erstellen
-    if (core->instance != VK_NULL_HANDLE)
+    // X11: Display und Window holen
+    Display* display = _gui_get_x11_display();
+    Window window = _gui_get_x11_window(widget);
+    
+    if (!display || !window)
     {
-        GError* error = NULL;
-        if (!gdk_vulkan_surface_create(gdk_surface, core->instance, NULL, &core->surface, &error))
-        {
-            logging_log_formatted("Failed to create Vulkan surface: %s", error->message);
-            g_error_free(error);
-            return;
-        }
-        logging_log_message("Vulkan surface created successfully");
-    }
-    else
-    {
-        logging_log_message("No VkInstance available for surface creation");
+        logging_log_message("Failed to get X11 display or window");
         return;
     }
-    
+
+    // XCB-Connection
+    xcb_connection_t* connection = XGetXCBConnection(display);
+    if (!connection)
+    {
+        logging_log_message("Failed to get XCB connection");
+        return;
+    }
+
+    // Vulkan XCB-Surface
+    VkXcbSurfaceCreateInfoKHR createInfo = {
+        .sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR,
+        .connection = connection,
+        .window = window
+    };
+
+    VkResult result = vkCreateXcbSurfaceKHR(core->instance, &createInfo, NULL, &core->surface);
+    if (result != VK_SUCCESS)
+    {
+        logging_log_formatted("Failed to create XCB surface: %d", result);
+        return;
+    }
+
+    logging_log_message("Vulkan XCB surface created successfully");
     core->initialized = true;
     
     if (gui_vulkan != NULL)
@@ -88,10 +128,9 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
 
     if (core->surface != VK_NULL_HANDLE)
     {
-        // Surface wird von der App zerstört
+        vkDestroySurfaceKHR(core->instance, core->surface, NULL);
         core->surface = VK_NULL_HANDLE;
     }
-    
     core->initialized = false;
 }
 
@@ -122,28 +161,11 @@ static void _gui_vulkan_resize_callback(GtkWidget* widget, gpointer user_data)
 }
 
 // === Render ===
+
 static void _gui_vulkan_render_callback(GtkDrawingArea* drawing_area, cairo_t* cr, int width, int height, gpointer user_data)
 {
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(GTK_WIDGET(drawing_area));
-    if (!core) return;
-
-    if (!core->render_pending)
-    {
-        return;
-    }
-    
-    core->render_pending = false;
-    
-    if (gui_vulkan != NULL)
-    {
-        struct gui_event e = {0};
-        e.type = GE_VULKAN_RENDER;
-        e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
-        e.data.vulkan_render.surface = core->surface;
-        e.data.vulkan_render.width = width;
-        e.data.vulkan_render.height = height;
-        gui_vulkan((gui_vulkan_t) core, &e);
-    }
+    // SOFORT ZURÜCKKEHREN – NICHTS TUN!
+    return;
 }
 
 // === Öffentliche Funktionen ===
@@ -161,7 +183,7 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
     
     core->vulkan_area = drawing_area;
     core->user_data = user_data;
-    core->instance = instance;   // <-- NEU: Instance speichern
+    core->instance = instance;
     core->surface = VK_NULL_HANDLE;
     core->initialized = false;
     core->render_pending = false;
@@ -170,16 +192,34 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
     
     _gui_vulkan_set_core(drawing_area, core);
     
-    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area),
-        _gui_vulkan_render_callback, NULL, NULL);
+    // ALLE SIGNALE DEAKTIVIERT!
+    // gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area),
+    //     _gui_vulkan_render_callback, NULL, NULL);
     
-    g_signal_connect(drawing_area, "realize", G_CALLBACK(_gui_vulkan_realize_callback), NULL);
-    g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
-    g_signal_connect(drawing_area, "resize", G_CALLBACK(_gui_vulkan_resize_callback), drawing_area);
+    // g_signal_connect(drawing_area, "realize", G_CALLBACK(_gui_vulkan_realize_callback), NULL);
+    // g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
+    // g_signal_connect(drawing_area, "resize", G_CALLBACK(_gui_vulkan_resize_callback), drawing_area);
     
     _gui_add_widget_to_internal_list(drawing_area);
     
     return drawing_area;
+}
+
+void gui_vulkan_set_instance(GtkWidget* vulkan_widget, VkInstance instance)
+{
+    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    if (!core)
+    {
+        logging_log_message("gui_vulkan_set_instance: core is NULL!");
+        return;
+    }
+    if (instance == VK_NULL_HANDLE)
+    {
+        logging_log_message("gui_vulkan_set_instance: instance is VK_NULL_HANDLE!");
+        return;
+    }
+    core->instance = instance;
+    logging_log_formatted("gui_vulkan_set_instance: instance set successfully! instance = %p", instance);
 }
 
 VkSurfaceKHR gui_vulkan_get_surface(GtkWidget* vulkan_widget)

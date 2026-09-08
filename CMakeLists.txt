@@ -7,6 +7,9 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 pkg_check_modules(EPOXY REQUIRED epoxy)
 pkg_check_modules(VULKAN REQUIRED IMPORTED_TARGET vulkan)
+pkg_check_modules(X11 REQUIRED IMPORTED_TARGET x11)
+pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb)
+pkg_check_modules(X11_XCB REQUIRED IMPORTED_TARGET x11-xcb)
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -52,4 +55,7 @@ target_link_libraries(gui
 		api
 	PRIVATE
 		${EPOXY_LIBRARIES}
+		${X11_LIBRARIES}
+		${XCB_LIBRARIES}
+		${X11_XCB_LIBRARIES}
 )
