@@ -23,6 +23,7 @@ typedef enum
 	GE_GL_RENDER,
 	GE_GL_REALIZE,
 	GE_VULKAN_REALIZE,
+	GE_VULKAN_UNREALIZE,
     GE_VULKAN_RENDER,
 	GE_VULKAN_RESIZE
 } gui_event_type_t;
@@ -91,7 +92,13 @@ typedef struct _gui_dialog_close_request_event
 	bool close;
 } *gui_dialog_close_request_event_t;
 
-// Event-Daten für Vulkan-Render
+// Neue Event-Datenstrukturen
+typedef struct _gui_vulkan_realize_event
+{
+    GtkWidget* vulkan_area;
+    VkSurfaceKHR surface;
+} *gui_vulkan_realize_event_t;
+
 typedef struct _gui_vulkan_render_event
 {
     GtkWidget* vulkan_area;
@@ -99,13 +106,6 @@ typedef struct _gui_vulkan_render_event
     uint32_t width;
     uint32_t height;
 } *gui_vulkan_render_event_t;
-
-// Event-Daten für Vulkan-Realize
-typedef struct _gui_vulkan_realize_event
-{
-    GtkWidget* vulkan_area;
-    VkSurfaceKHR surface;
-} *gui_vulkan_realize_event_t;
 
 typedef struct _gui_vulkan_resize_event
 {
@@ -116,6 +116,12 @@ typedef struct _gui_vulkan_resize_event
     uint32_t old_width;
     uint32_t old_height;
 } *gui_vulkan_resize_event_t;
+
+typedef struct _gui_vulkan_unrealize_event
+{
+    GtkWidget* vulkan_area;
+    VkSurfaceKHR surface;
+} *gui_vulkan_unrealize_event_t;
 
 typedef union _gui_event_data
 {
@@ -133,6 +139,7 @@ typedef union _gui_event_data
 	struct _gui_vulkan_render_event vulkan_render;
     struct _gui_vulkan_realize_event vulkan_realize;
 	struct _gui_vulkan_resize_event vulkan_resize;
+	struct _gui_vulkan_unrealize_event vulkan_unrealize;
 } *gui_event_data_t;
 
 typedef struct gui_event
