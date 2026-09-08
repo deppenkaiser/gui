@@ -6,6 +6,7 @@ project(gui LANGUAGES C)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 pkg_check_modules(EPOXY REQUIRED epoxy)
+pkg_check_modules(VULKAN REQUIRED IMPORTED_TARGET vulkan)
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -34,6 +35,7 @@ target_sources(gui PRIVATE
 	widget.c
 	box.c
 	gl.c
+	vulkan.c
 )
 
 target_include_directories(gui PUBLIC
@@ -43,6 +45,7 @@ target_include_directories(gui PUBLIC
 target_link_libraries(gui
 	PUBLIC
 		PkgConfig::GTK4
+		PkgConfig::VULKAN
 		logging
 		threading
 		string
