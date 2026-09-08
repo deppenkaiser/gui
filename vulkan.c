@@ -42,7 +42,8 @@ static _gui_vulkan_core_t _gui_vulkan_get_core(GtkWidget* widget)
     {
         return NULL;
     }
-    return (_gui_vulkan_core_t) g_object_get_data(G_OBJECT(widget), "vulkan_core");
+    // Verwende den generischen "core" Key, damit _gui_destroy_widget_core funktioniert
+    return (_gui_vulkan_core_t) g_object_get_data(G_OBJECT(widget), "core");
 }
 
 static void _gui_vulkan_set_core(GtkWidget* widget, _gui_vulkan_core_t core)
@@ -51,7 +52,8 @@ static void _gui_vulkan_set_core(GtkWidget* widget, _gui_vulkan_core_t core)
     {
         return;
     }
-    g_object_set_data(G_OBJECT(widget), "vulkan_core", core);
+    // Verwende den generischen "core" Key, damit _gui_destroy_widget_core funktioniert
+    g_object_set_data(G_OBJECT(widget), "core", core);
 }
 
 // === X11-Hilfsfunktionen ===
