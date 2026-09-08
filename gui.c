@@ -34,7 +34,7 @@ static void _gui_destroy_widget_core(GtkWidget* widget)
 	if (core)
 	{
 		logging_log_formatted("_gui_destroy_widget_core: freeing core %p for widget %p", core, widget);
-		g_free(core);
+		free(core);
 		g_object_set_data(G_OBJECT(widget), "core", NULL);
 	}
 }
@@ -51,7 +51,7 @@ void _gui_add_widget_to_internal_list(GtkWidget* widget)
 		return;
 	}
 
-	_gui_widgets_list_element_t entry = g_malloc(sizeof(struct _gui_widgets_list_element));
+	_gui_widgets_list_element_t entry = malloc(sizeof(struct _gui_widgets_list_element));
 	if (!entry)
 	{
 		logging_log_message("_gui_add_widget_to_internal_list: failed to allocate list element");
@@ -78,7 +78,7 @@ void _gui_remove_widget_from_internal_list(GtkWidget* widget)
 		{
 			LIST_REMOVE(entry, elements);
 			_gui_destroy_widget_core(widget);
-			g_free(entry);
+			free(entry);
 			logging_log_formatted("_gui_remove_widget_from_internal_list: removed widget %p", widget);
 			return;
 		}
@@ -117,7 +117,7 @@ void _gui_destroy_all_widget_cores()
 	while (entry != NULL)
 	{
 		_gui_widgets_list_element_t next = LIST_NEXT(entry, elements);
-		g_free(entry);
+		free(entry);
 		entry = next;
 	}
 	LIST_INIT(&_widgets_list_head);
