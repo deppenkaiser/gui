@@ -15,6 +15,7 @@ typedef struct _gui_vulkan_core
 {
     GtkWidget* vulkan_area;
     VkSurfaceKHR surface;
+    VkInstance instance;      // <-- NEU
     void* user_data;
     int width;
     int height;
@@ -49,6 +50,24 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
         return;
     }
 
+    // GTK4: Vulkan-Surface mit der gespeicherten Instance erstellen
+    if (core->instance != VK_NULL_HANDLE)
+    {
+        GError* error = NULL;
+        if (!gdk_vulkan_surface_create(gdk_surface, core->instance, NULL, &core->surface, &error))
+        {
+            logging_log_formatted("Failed to create Vulkan surface: %s", error->message);
+            g_error_free(error);
+            return;
+        }
+        logging_log_message("Vulkan surface created successfully");
+    }
+    else
+    {
+        logging_log_message("No VkInstance available for surface creation");
+        return;
+    }
+    
     core->initialized = true;
     
     if (gui_vulkan != NULL)
@@ -69,13 +88,14 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
 
     if (core->surface != VK_NULL_HANDLE)
     {
+        // Surface wird von der App zerstört
         core->surface = VK_NULL_HANDLE;
     }
     
     core->initialized = false;
 }
 
-// === Resize (Signal "resize") ===
+// === Resize ===
 static void _gui_vulkan_resize_callback(GtkWidget* widget, gpointer user_data)
 {
     _gui_vulkan_core_t core = _gui_vulkan_get_core(widget);
@@ -128,7 +148,7 @@ static void _gui_vulkan_render_callback(GtkDrawingArea* drawing_area, cairo_t* c
 
 // === Öffentliche Funktionen ===
 
-GtkWidget* gui_vulkan_create(void* user_data)
+GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
 {
     GtkWidget* drawing_area = gtk_drawing_area_new();
     
@@ -141,6 +161,7 @@ GtkWidget* gui_vulkan_create(void* user_data)
     
     core->vulkan_area = drawing_area;
     core->user_data = user_data;
+    core->instance = instance;   // <-- NEU: Instance speichern
     core->surface = VK_NULL_HANDLE;
     core->initialized = false;
     core->render_pending = false;
@@ -166,6 +187,13 @@ VkSurfaceKHR gui_vulkan_get_surface(GtkWidget* vulkan_widget)
     _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
     if (!core) return VK_NULL_HANDLE;
     return core->surface;
+}
+
+VkInstance gui_vulkan_get_instance(GtkWidget* vulkan_widget)
+{
+    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    if (!core) return VK_NULL_HANDLE;
+    return core->instance;
 }
 
 GtkWidget* gui_vulkan_get_drawing_area(GtkWidget* vulkan_widget)
