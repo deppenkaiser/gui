@@ -14,17 +14,90 @@ typedef struct _gui_widgets_list_element
 
 LIST_HEAD(_gui_widgets_list_head, _gui_widgets_list_element);
 
-private struct _gui_widgets_list_head _widgets_list_head = {0};
+static struct _gui_widgets_list_head _widgets_list_head = {0};
 
-private void _gui_destroy_widget_core(GtkWidget* widget)
+// ============================================================================
+// Widget-Core Verwaltung
+// ============================================================================
+
+static void _gui_destroy_widget_core(GtkWidget* widget)
 {
-	free(_gui_get_core(widget));
-	g_object_set_data(G_OBJECT(widget), "core", NULL);
+	if (!widget)
+	{
+		logging_log_message("_gui_destroy_widget_core: widget is NULL");
+		return;
+	}
+
+	void* core = _gui_get_core(widget);
+	if (core)
+	{
+		logging_log_formatted("_gui_destroy_widget_core: freeing core %p for widget %p", core, widget);
+		free(core);
+		g_object_set_data(G_OBJECT(widget), "core", NULL);
+	}
 }
 
-// extern void _gui_destroy_all_widget_cores();
+// ============================================================================
+// Widget-Liste verwalten
+// ============================================================================
+
+void _gui_add_widget_to_internal_list(GtkWidget* widget)
+{
+	if (!widget)
+	{
+		logging_log_message("_gui_add_widget_to_internal_list: widget is NULL");
+		return;
+	}
+
+	_gui_widgets_list_element_t entry = malloc(sizeof(struct _gui_widgets_list_element));
+	if (!entry)
+	{
+		logging_log_message("_gui_add_widget_to_internal_list: failed to allocate list element");
+		return;
+	}
+
+	entry->widget = widget;
+	LIST_INSERT_HEAD(&_widgets_list_head, entry, elements);
+	logging_log_formatted("_gui_add_widget_to_internal_list: added widget %p", widget);
+}
+
+void _gui_remove_widget_from_internal_list(GtkWidget* widget)
+{
+	if (!widget)
+	{
+		logging_log_message("_gui_remove_widget_from_internal_list: widget is NULL");
+		return;
+	}
+
+	_gui_widgets_list_element_t entry = NULL;
+	LIST_FOREACH(entry, &_widgets_list_head, elements)
+	{
+		if (entry->widget == widget)
+		{
+			LIST_REMOVE(entry, elements);
+			_gui_destroy_widget_core(widget);
+			free(entry);
+			logging_log_formatted("_gui_remove_widget_from_internal_list: removed widget %p", widget);
+			return;
+		}
+	}
+
+	logging_log_formatted("_gui_remove_widget_from_internal_list: widget %p not found", widget);
+}
+
+void* _gui_get_core(GtkWidget* widget)
+{
+	if (!widget)
+	{
+		return NULL;
+	}
+	return g_object_get_data(G_OBJECT(widget), "core");
+}
+
 void _gui_destroy_all_widget_cores()
 {
+	logging_log_message("_gui_destroy_all_widget_cores: ENTER");
+
 	_gui_widgets_list_element_t entry = NULL;
 	LIST_FOREACH(entry, &_widgets_list_head, elements)
 	{
@@ -38,6 +111,7 @@ void _gui_destroy_all_widget_cores()
 		}
 	}
 
+	// Alle List-Einträge freigeben
 	entry = LIST_FIRST(&_widgets_list_head);
 	while (entry != NULL)
 	{
@@ -46,166 +120,6 @@ void _gui_destroy_all_widget_cores()
 		entry = next;
 	}
 	LIST_INIT(&_widgets_list_head);
-}
 
-// extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
-void _gui_add_widget_to_internal_list(GtkWidget* widget)
-{
-	_gui_widgets_list_element_t entry = malloc(sizeof(struct _gui_widgets_list_element));
-	entry->widget = widget;
-	LIST_INSERT_HEAD(&_widgets_list_head, entry, elements);
-}
-
-// extern void _gui_remove_widget_from_internal_list(GtkWidget* widget);
-void _gui_remove_widget_from_internal_list(GtkWidget* widget)
-{
-	_gui_widgets_list_element_t entry = NULL;
-	LIST_FOREACH(entry, &_widgets_list_head, elements)
-	{
-		if (entry->widget == widget)
-		{
-			LIST_REMOVE(entry, elements);
-			_gui_destroy_widget_core(widget);
-			entry->widget = NULL;
-			break;
-		}
-	}
-}
-
-// extern void* _gui_get_core(GtkWidget* widget);
-void* _gui_get_core(GtkWidget* widget)
-{
-	return g_object_get_data(G_OBJECT(widget), "core");
-}
-
-// extern gboolean _gui_debug_event_callback(GtkEventControllerLegacy* self, GdkEvent* event, gpointer user_data);
-gboolean _gui_debug_event_callback(GtkEventControllerLegacy* self, GdkEvent* event, gpointer user_data)
-{
-    gboolean handled = FALSE;
-    GdkEventType type = gdk_event_get_event_type(event);
-
-	switch (type)
-	{
-		case GDK_DELETE:
-			logging_log_message("GDK_DELETE");
-			break;
-
-		case GDK_MOTION_NOTIFY:
-			logging_log_message("GDK_MOTION_NOTIFY");
-			break;
-
-		case GDK_BUTTON_PRESS:
-			logging_log_message("GDK_BUTTON_PRESS");
-			break;
-
-		case GDK_BUTTON_RELEASE:
-			logging_log_message("GDK_BUTTON_RELEASE");
-			break;
-
-		case GDK_KEY_PRESS:
-			logging_log_message("GDK_KEY_PRESS");
-			break;
-
-		case GDK_KEY_RELEASE:
-			logging_log_message("GDK_KEY_RELEASE");
-			break;
-
-		case GDK_ENTER_NOTIFY:
-			logging_log_message("GDK_ENTER_NOTIFY");
-			break;
-
-		case GDK_LEAVE_NOTIFY:
-			logging_log_message("GDK_LEAVE_NOTIFY");
-			break;
-
-		case GDK_FOCUS_CHANGE:
-			logging_log_message("GDK_FOCUS_CHANGE");
-			break;
-
-		case GDK_PROXIMITY_IN:
-			logging_log_message("GDK_PROXIMITY_IN");
-			break;
-
-		case GDK_PROXIMITY_OUT:
-			logging_log_message("GDK_PROXIMITY_OUT");
-			break;
-
-		case GDK_DRAG_ENTER:
-			logging_log_message("GDK_DRAG_ENTER");
-			break;
-
-		case GDK_DRAG_LEAVE:
-			logging_log_message("GDK_DRAG_LEAVE");
-			break;
-
-		case GDK_DRAG_MOTION:
-			logging_log_message("GDK_DRAG_MOTION");
-			break;
-
-		case GDK_DROP_START:
-			logging_log_message("GDK_DROP_START");
-			break;
-
-		case GDK_SCROLL:
-			logging_log_message("GDK_SCROLL");
-			break;
-
-		case GDK_GRAB_BROKEN:
-			logging_log_message("GDK_GRAB_BROKEN");
-			break;
-
-		case GDK_TOUCH_BEGIN:
-			logging_log_message("GDK_TOUCH_BEGIN");
-			break;
-
-		case GDK_TOUCH_UPDATE:
-			logging_log_message("GDK_TOUCH_UPDATE");
-			break;
-
-		case GDK_TOUCH_END:
-			logging_log_message("GDK_TOUCH_END");
-			break;
-
-		case GDK_TOUCH_CANCEL:
-			logging_log_message("GDK_TOUCH_CANCEL");
-			break;
-
-		case GDK_TOUCHPAD_SWIPE:
-			logging_log_message("GDK_TOUCHPAD_SWIPE");
-			break;
-
-		case GDK_TOUCHPAD_PINCH:
-			logging_log_message("GDK_TOUCHPAD_PINCH");
-			break;
-
-		case GDK_PAD_BUTTON_PRESS:
-			logging_log_message("GDK_PAD_BUTTON_PRESS");
-			break;
-
-		case GDK_PAD_BUTTON_RELEASE:
-			logging_log_message("GDK_PAD_BUTTON_RELEASE");
-			break;
-
-		case GDK_PAD_RING:
-			logging_log_message("GDK_PAD_RING");
-			break;
-
-		case GDK_PAD_STRIP:
-			logging_log_message("GDK_PAD_STRIP");
-			break;
-
-		case GDK_PAD_GROUP_MODE:
-			logging_log_message("GDK_PAD_GROUP_MODE");
-			break;
-
-		case GDK_TOUCHPAD_HOLD:
-			logging_log_message("GDK_TOUCHPAD_HOLD");
-			break;
-
-		case GDK_EVENT_LAST:
-			logging_log_message("GDK_EVENT_LAST");
-			break;
-	}
-
-    return handled;
+	logging_log_message("_gui_destroy_all_widget_cores: SUCCESS");
 }
