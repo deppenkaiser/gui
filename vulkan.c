@@ -5,6 +5,9 @@
 #include <gtk/gtk.h>
 #include <logging/logging.h>
 #include <stdlib.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include <xcb/xcb.h>
 #include <X11/Xlib.h>
@@ -18,6 +21,20 @@ protected_import(void*, _gui_get_core(GtkWidget* widget));
 // === Externe Deklarationen für GTK4-X11-Funktionen ===
 extern Display* gdk_x11_display_get_xdisplay(GdkDisplay* display);
 extern Window gdk_x11_surface_get_xid(GdkSurface* surface);
+
+// === Crash Handler ===
+static void _gui_vulkan_signal_handler(int sig)
+{
+    void *array[50];
+    int size;
+    
+    logging_log_formatted("SIGNAL %d received!", sig);
+    
+    size = backtrace(array, 50);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    
+    _exit(1);
+}
 
 // === Callback-Deklaration ===
 callback_declaration(void, gui_vulkan(gui_vulkan_t core, gui_event_t e));
@@ -98,7 +115,6 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
         return;
     }
 
-    // X11: Display und Window holen
     Display* display = _gui_get_x11_display();
     Window window = _gui_get_x11_window(widget);
 
@@ -115,7 +131,6 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
 
     logging_log_formatted("_gui_vulkan_realize_callback: display=%p, window=%lu", (void*)display, window);
 
-    // XCB-Connection
     xcb_connection_t* connection = XGetXCBConnection(display);
     if (!connection)
     {
@@ -123,7 +138,6 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
         return;
     }
 
-    // Vulkan XCB-Surface
     VkXcbSurfaceCreateInfoKHR createInfo = {
         .sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR,
         .connection = connection,
@@ -140,7 +154,6 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
     logging_log_formatted("_gui_vulkan_realize_callback: Vulkan XCB surface created: %p", core->surface);
     core->initialized = true;
 
-    // Callback aufrufen
     if (gui_vulkan != NULL)
     {
         struct gui_event e = {0};
@@ -172,7 +185,6 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
     }
     core->initialized = false;
 
-    // Callback aufrufen
     if (gui_vulkan != NULL)
     {
         struct gui_event e = {0};
@@ -191,7 +203,6 @@ static void _gui_vulkan_render_callback(
     int height,
     gpointer user_data)
 {
-    // Rendering deaktiviert
     return;
 }
 
@@ -199,6 +210,14 @@ static void _gui_vulkan_render_callback(
 
 GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
 {
+    static bool handler_installed = false;
+    if (!handler_installed)
+    {
+        signal(SIGSEGV, _gui_vulkan_signal_handler);
+        signal(SIGABRT, _gui_vulkan_signal_handler);
+        handler_installed = true;
+    }
+
     logging_log_formatted("gui_vulkan_create: instance=%p, user_data=%p", instance, user_data);
 
     GtkWidget* drawing_area = gtk_drawing_area_new();
@@ -208,12 +227,14 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
         return NULL;
     }
 
-    gui_vulkan_t core = calloc(1, sizeof(struct _gui_vulkan));
+    gui_vulkan_t core = (gui_vulkan_t) g_malloc(sizeof(struct _gui_vulkan));
     if (!core)
     {
         logging_log_message("gui_vulkan_create: failed to allocate Vulkan core structure");
         return NULL;
     }
+
+    memset(core, 0, sizeof(struct _gui_vulkan));
 
     core->vulkan_area = drawing_area;
     core->user_data = user_data;
@@ -225,7 +246,6 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
 
     _gui_vulkan_set_core(drawing_area, core);
 
-    // Nur realize-Signal aktiviert
     g_signal_connect(drawing_area, "realize", G_CALLBACK(_gui_vulkan_realize_callback), NULL);
     // g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
     // gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area), _gui_vulkan_render_callback, NULL, NULL);
