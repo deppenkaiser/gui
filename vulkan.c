@@ -19,33 +19,20 @@ protected_import(void*, _gui_get_core(GtkWidget* widget));
 extern Display* gdk_x11_display_get_xdisplay(GdkDisplay* display);
 extern Window gdk_x11_surface_get_xid(GdkSurface* surface);
 
-// === Interne Struktur (identisch mit gui_vulkan_t für Kompatibilität) ===
-typedef struct _gui_vulkan_core
-{
-    GtkWidget* vulkan_area;
-    VkSurfaceKHR surface;
-    VkInstance instance;
-    void* user_data;
-    bool initialized;
-    int width;
-    int height;
-    bool render_pending;
-} *_gui_vulkan_core_t;
-
 // === Callback-Deklaration ===
 callback_declaration(void, gui_vulkan(gui_vulkan_t core, gui_event_t e));
 
 // === Hilfsfunktionen ===
-static _gui_vulkan_core_t _gui_vulkan_get_core(GtkWidget* widget)
+static gui_vulkan_t _gui_vulkan_get_core(GtkWidget* widget)
 {
     if (!widget)
     {
         return NULL;
     }
-    return (_gui_vulkan_core_t) g_object_get_data(G_OBJECT(widget), "core");
+    return (gui_vulkan_t) g_object_get_data(G_OBJECT(widget), "core");
 }
 
-static void _gui_vulkan_set_core(GtkWidget* widget, _gui_vulkan_core_t core)
+static void _gui_vulkan_set_core(GtkWidget* widget, gui_vulkan_t core)
 {
     if (!widget)
     {
@@ -96,7 +83,7 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
 {
     logging_log_formatted("_gui_vulkan_realize_callback: widget %p", widget);
 
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(widget);
     if (!core)
     {
         logging_log_message("_gui_vulkan_realize_callback: core is NULL");
@@ -160,7 +147,7 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
         e.type = GE_VULKAN_REALIZE;
         e.data.vulkan_realize.vulkan_area = widget;
         e.data.vulkan_realize.surface = core->surface;
-        gui_vulkan((gui_vulkan_t) core, &e);
+        gui_vulkan(core, &e);
         logging_log_message("_gui_vulkan_realize_callback: GE_VULKAN_REALIZE callback invoked");
     }
 }
@@ -170,7 +157,7 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
 {
     logging_log_formatted("_gui_vulkan_unrealize_callback: widget %p", widget);
 
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(widget);
     if (!core)
     {
         logging_log_message("_gui_vulkan_unrealize_callback: core is NULL");
@@ -191,45 +178,8 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
         struct gui_event e = {0};
         e.type = GE_VULKAN_UNREALIZE;
         e.data.vulkan_unrealize.vulkan_area = widget;
-        gui_vulkan((gui_vulkan_t) core, &e);
+        gui_vulkan(core, &e);
         logging_log_message("_gui_vulkan_unrealize_callback: GE_VULKAN_UNREALIZE callback invoked");
-    }
-}
-
-// === Resize ===
-static void _gui_vulkan_resize_callback(GtkWidget* widget, int width, int height, gpointer user_data)
-{
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(widget);
-    if (!core)
-    {
-        logging_log_message("_gui_vulkan_resize_callback: core is NULL");
-        return;
-    }
-
-    int old_width = core->width;
-    int old_height = core->height;
-
-    core->width = width;
-    core->height = height;
-
-    if (width != old_width || height != old_height)
-    {
-        logging_log_formatted("_gui_vulkan_resize_callback: resized from %dx%d to %dx%d",
-            old_width, old_height, width, height);
-
-        if (gui_vulkan != NULL)
-        {
-            struct gui_event e = {0};
-            e.type = GE_VULKAN_RESIZE;
-            e.data.vulkan_resize.vulkan_area = widget;
-            e.data.vulkan_resize.surface = core->surface;
-            e.data.vulkan_resize.width = width;
-            e.data.vulkan_resize.height = height;
-            e.data.vulkan_resize.old_width = old_width;
-            e.data.vulkan_resize.old_height = old_height;
-            gui_vulkan((gui_vulkan_t) core, &e);
-            logging_log_message("_gui_vulkan_resize_callback: GE_VULKAN_RESIZE callback invoked");
-        }
     }
 }
 
@@ -258,7 +208,7 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
         return NULL;
     }
 
-    _gui_vulkan_core_t core = calloc(1, sizeof(struct _gui_vulkan_core));
+    gui_vulkan_t core = calloc(1, sizeof(struct _gui_vulkan));
     if (!core)
     {
         logging_log_message("gui_vulkan_create: failed to allocate Vulkan core structure");
@@ -270,19 +220,15 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
     core->instance = instance;
     core->surface = VK_NULL_HANDLE;
     core->initialized = false;
-    core->render_pending = false;
     core->width = 0;
     core->height = 0;
 
     _gui_vulkan_set_core(drawing_area, core);
 
-    // Signale aktiviert
-    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area),
-        _gui_vulkan_render_callback, NULL, NULL);
-
+    // Nur realize-Signal aktiviert
     g_signal_connect(drawing_area, "realize", G_CALLBACK(_gui_vulkan_realize_callback), NULL);
-    g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
-    g_signal_connect(drawing_area, "resize", G_CALLBACK(_gui_vulkan_resize_callback), NULL);
+    // g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
+    // gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area), _gui_vulkan_render_callback, NULL, NULL);
 
     _gui_add_widget_to_internal_list(drawing_area);
 
@@ -294,7 +240,7 @@ void gui_vulkan_set_instance(GtkWidget* vulkan_widget, VkInstance instance)
 {
     logging_log_formatted("gui_vulkan_set_instance: widget=%p, instance=%p", vulkan_widget, instance);
 
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
     if (!core)
     {
         logging_log_message("gui_vulkan_set_instance: core is NULL");
@@ -311,7 +257,7 @@ void gui_vulkan_set_instance(GtkWidget* vulkan_widget, VkInstance instance)
 
 VkSurfaceKHR gui_vulkan_get_surface(GtkWidget* vulkan_widget)
 {
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
     if (!core)
     {
         return VK_NULL_HANDLE;
@@ -321,7 +267,7 @@ VkSurfaceKHR gui_vulkan_get_surface(GtkWidget* vulkan_widget)
 
 VkInstance gui_vulkan_get_instance(GtkWidget* vulkan_widget)
 {
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
     if (!core)
     {
         return VK_NULL_HANDLE;
@@ -331,7 +277,7 @@ VkInstance gui_vulkan_get_instance(GtkWidget* vulkan_widget)
 
 GtkWidget* gui_vulkan_get_drawing_area(GtkWidget* vulkan_widget)
 {
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
     if (!core)
     {
         return NULL;
@@ -341,7 +287,7 @@ GtkWidget* gui_vulkan_get_drawing_area(GtkWidget* vulkan_widget)
 
 bool gui_vulkan_is_initialized(GtkWidget* vulkan_widget)
 {
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
     if (!core)
     {
         return false;
@@ -351,21 +297,20 @@ bool gui_vulkan_is_initialized(GtkWidget* vulkan_widget)
 
 void gui_vulkan_queue_render(GtkWidget* vulkan_widget)
 {
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
     if (!core)
     {
         logging_log_message("gui_vulkan_queue_render: core is NULL");
         return;
     }
 
-    core->render_pending = true;
     gtk_widget_queue_draw(vulkan_widget);
     logging_log_formatted("gui_vulkan_queue_render: render queued for widget %p", vulkan_widget);
 }
 
 void gui_vulkan_get_size(GtkWidget* vulkan_widget, int* width, int* height)
 {
-    _gui_vulkan_core_t core = _gui_vulkan_get_core(vulkan_widget);
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
     if (!core)
     {
         if (width) *width = 0;
