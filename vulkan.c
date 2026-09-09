@@ -203,8 +203,19 @@ static void _gui_vulkan_render_callback(
     int height,
     gpointer user_data)
 {
-    // Leerer Draw-Func - verhindert EGL-Rendering durch GTK
-    return;
+    gui_vulkan_t core = _gui_vulkan_get_core(GTK_WIDGET(drawing_area));
+    if (!core) return;
+
+    if (gui_vulkan != NULL)
+    {
+        struct gui_event e = {0};
+        e.type = GE_VULKAN_RENDER;
+        e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
+        e.data.vulkan_render.surface = core->surface;
+        e.data.vulkan_render.width = width;
+        e.data.vulkan_render.height = height;
+        gui_vulkan(core, &e);
+    }
 }
 
 // === Öffentliche Funktionen ===
@@ -247,12 +258,11 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
 
     _gui_vulkan_set_core(drawing_area, core);
 
-    // Draw-Func aktivieren (verhindert EGL-Crash)
     gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(drawing_area),
         _gui_vulkan_render_callback, NULL, NULL);
 
     g_signal_connect(drawing_area, "realize", G_CALLBACK(_gui_vulkan_realize_callback), NULL);
-    // g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
+    g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
 
     _gui_add_widget_to_internal_list(drawing_area);
 
