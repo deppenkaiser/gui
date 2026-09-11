@@ -98,6 +98,8 @@ typedef struct _gui_vulkan_realize_event
 {
 	GtkWidget* vulkan_area;
 	VkSurfaceKHR surface;
+	uint32_t width;
+	uint32_t height;
 } *gui_vulkan_realize_event_t;
 
 typedef struct _gui_vulkan_render_event

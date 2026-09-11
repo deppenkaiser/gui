@@ -114,6 +114,14 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
     gui_vulkan_t core = _gui_vulkan_get_core(widget);
     if (core)
     {
+        core->width = gtk_widget_get_width(widget);
+        core->height = gtk_widget_get_height(widget);
+        if (core->width == 0 || core->height == 0)
+        {
+            core->width = 800;
+            core->height = 600;
+        }
+
         LOG(MODULE_ID, "_gui_vulkan_realize_callback: instance = %p", core->instance);
 
         if (core->instance != VK_NULL_HANDLE)
@@ -146,6 +154,8 @@ static void _gui_vulkan_realize_callback(GtkWidget* widget, gpointer user_data)
                             e.type = GE_VULKAN_REALIZE;
                             e.data.vulkan_realize.vulkan_area = widget;
                             e.data.vulkan_realize.surface = core->surface;
+                            e.data.vulkan_realize.width = core->width;
+                            e.data.vulkan_realize.height = core->height;
                             gui_vulkan(core, &e);
                             LOG(MODULE_ID, "_gui_vulkan_realize_callback: GE_VULKAN_REALIZE callback invoked");
                         }
