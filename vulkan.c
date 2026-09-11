@@ -197,9 +197,32 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
 }
 
 // === Render ===
-static bool _gui_vulkan_is_rendering = false;
+static guint _gui_vulkan_timer_id = 0;
 
-// === Render ===
+static gboolean _gui_vulkan_timer_callback(gpointer user_data)
+{
+    GtkWidget* vulkan_area = GTK_WIDGET(user_data);
+    gtk_widget_queue_draw(vulkan_area);
+    return G_SOURCE_CONTINUE;
+}
+
+static void _gui_vulkan_start_render_timer(GtkWidget* vulkan_area)
+{
+    if (_gui_vulkan_timer_id == 0)
+    {
+        _gui_vulkan_timer_id = g_timeout_add(16, _gui_vulkan_timer_callback, vulkan_area);
+    }
+}
+
+static void _gui_vulkan_stop_render_timer(void)
+{
+    if (_gui_vulkan_timer_id != 0)
+    {
+        g_source_remove(_gui_vulkan_timer_id);
+        _gui_vulkan_timer_id = 0;
+    }
+}
+
 static void _gui_vulkan_render_callback(
     GtkDrawingArea* drawing_area,
     cairo_t* cr,
@@ -210,21 +233,16 @@ static void _gui_vulkan_render_callback(
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint(cr);
-    if (!_gui_vulkan_is_rendering)
+    gui_vulkan_t core = _gui_vulkan_get_core(GTK_WIDGET(drawing_area));
+    if (core && gui_vulkan != NULL)
     {
-        _gui_vulkan_is_rendering = true;
-        gui_vulkan_t core = _gui_vulkan_get_core(GTK_WIDGET(drawing_area));
-        if (core && gui_vulkan != NULL)
-        {
-            struct gui_event e = {0};
-            e.type = GE_VULKAN_RENDER;
-            e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
-            e.data.vulkan_render.surface = core->surface;
-            e.data.vulkan_render.width = width;
-            e.data.vulkan_render.height = height;
-            gui_vulkan(core, &e);
-        }
-        _gui_vulkan_is_rendering = false;
+        struct gui_event e = {0};
+        e.type = GE_VULKAN_RENDER;
+        e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
+        e.data.vulkan_render.surface = core->surface;
+        e.data.vulkan_render.width = width;
+        e.data.vulkan_render.height = height;
+        gui_vulkan(core, &e);
     }
 }
 
@@ -275,6 +293,7 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
     g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
 
     _gui_add_widget_to_internal_list(drawing_area);
+    _gui_vulkan_start_render_timer(drawing_area);
 
     LOG(MODULE_ID, "gui_vulkan_create: SUCCESS - widget=%p, core=%p", drawing_area, core);
     return drawing_area;
