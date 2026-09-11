@@ -518,11 +518,7 @@ void gui_vulkan_enter_fullscreen(GtkWidget* vulkan_widget)
         {
             core->is_fullscreen = true;
             gtk_window_fullscreen(window);
-            core->width = gtk_widget_get_width(vulkan_widget);
-            core->height = gtk_widget_get_height(vulkan_widget);
-            core->need_resize = true;
             core->need_render = true;
-            LOG(MODULE_ID, "gui_vulkan_enter_fullscreen");
         }
     }
 }
