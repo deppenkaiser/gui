@@ -226,15 +226,6 @@ static gboolean _gui_vulkan_idle_callback(gpointer user_data)
     {
         if (core->need_close)
         {
-            core->need_close = false;
-            core->need_render = false;
-            core->need_resize = false;
-            if (core->timer_id != 0)
-            {
-                g_source_remove(core->timer_id);
-                core->timer_id = 0;
-            }
-            gtk_widget_set_visible(vulkan_area, FALSE);
             result = G_SOURCE_REMOVE;
         }
         else if (core->need_resize)
@@ -266,7 +257,10 @@ static gboolean _gui_vulkan_idle_callback(gpointer user_data)
         result = G_SOURCE_CONTINUE;
     }
 
-    threading_thread_sleep(TTR_MILLI, 10);
+    if (result == G_SOURCE_CONTINUE)
+    {
+        threading_thread_sleep(TTR_MILLI, 10);
+    }
 
     return result;
 }

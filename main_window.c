@@ -55,6 +55,12 @@ private gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_d
 		if (e.data.close_request.close)
 		{
 			stop = FALSE;
+			GtkWidget* child = gtk_window_get_child(GTK_WINDOW(self));
+			if (child != NULL)
+			{
+				_gui_vulkan_request_close(child);
+			}
+			g_application_quit(g_application_get_default());
 		}
 		else
 		{
