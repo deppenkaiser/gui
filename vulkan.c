@@ -4,6 +4,7 @@
 #include <api/api.h>
 #include <gtk/gtk.h>
 #include <logging/logging.h>
+#include <threading/threading.h>
 #define MODULE_ID "GUI"
 #include <stdlib.h>
 #include <execinfo.h>
@@ -262,8 +263,10 @@ static gboolean _gui_vulkan_idle_callback(gpointer user_data)
     }
     else
     {
-        result = G_SOURCE_REMOVE;
+        result = G_SOURCE_CONTINUE;
     }
+
+    threading_thread_sleep(TTR_MILLI, 10);
 
     return result;
 }
