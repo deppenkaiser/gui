@@ -232,6 +232,7 @@ static gboolean _gui_vulkan_idle_callback(gpointer user_data)
         e.data.vulkan_resize.width = core->width;
         e.data.vulkan_resize.height = core->height;
         gui_vulkan(core, &e);
+        gtk_widget_queue_draw(vulkan_area);
         return G_SOURCE_CONTINUE;
     }
 
