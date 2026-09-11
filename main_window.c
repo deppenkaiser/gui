@@ -5,6 +5,8 @@
 #include <string/string.h>
 #include <logging/logging.h>
 
+#define MODULE_ID "GUI"
+
 callback_declaration(void, gui_main_window(gui_main_window_t core, gui_event_t e));
 callback_declaration(void, gui_main_window_action(GSimpleAction* simple_action, GVariant* parameter, gui_main_window_t core));
 
@@ -17,13 +19,13 @@ private gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint
     gboolean handled = FALSE;
 	if (gui_main_window != NULL)
 	{
-		struct gui_event e = {0};
-		e.type = GE_KEY_PRESSED;
-		e.data.key_pressed.keyval = keyval;
-		logging_log_message("key pressed event begin...");
-		gui_main_window((gui_main_window_t) user_data, &e);
-		logging_log_message("key pressed event end...");
-		handled = e.data.key_pressed.handled;
+	struct gui_event e = {0};
+	e.type = GE_KEY_PRESSED;
+	e.data.key_pressed.keyval = keyval;
+	LOG(MODULE_ID, "key pressed event begin...");
+	gui_main_window((gui_main_window_t) user_data, &e);
+	LOG(MODULE_ID, "key pressed event end...");
+	handled = e.data.key_pressed.handled;
 	}
     return handled;
 }
@@ -35,9 +37,9 @@ private void _gui_main_window_key_released(GtkEventControllerKey* self, guint ke
 		struct gui_event e = {0};
 		e.type = GE_KEY_RELEASED;
 		e.data.key_released.keyval = keyval;
-		logging_log_message("key released event begin...");
+		LOG(MODULE_ID, "key released event begin...");
 		gui_main_window((gui_main_window_t) user_data, &e);
-		logging_log_message("key released event end...");
+		LOG(MODULE_ID, "key released event end...");
 	}
 }
 
@@ -64,9 +66,9 @@ private void _gui_main_window_action_callback(GSimpleAction* simple_action, GVar
 {
 	if (gui_main_window_action != NULL)
 	{
-		logging_log_message("action event begin...");
+		LOG(MODULE_ID, "action event begin...");
 		gui_main_window_action(simple_action, parameter, (gui_main_window_t) user_data);
-		logging_log_message("action event end...");
+		LOG(MODULE_ID, "action event end...");
 	}
 }
 
@@ -118,11 +120,11 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 
 	if (gui_main_window != NULL)
 	{
-		struct gui_event e = {0};
-		e.type = GE_BEFORE_PRESENT;
-		logging_log_message("main window design phase begin.");
-		gui_main_window(core, &e);
-		logging_log_message("main window design phase end.");
+	 struct gui_event e = {0};
+	 e.type = GE_BEFORE_PRESENT;
+	 LOG(MODULE_ID, "main window design phase begin.");
+	 gui_main_window(core, &e);
+	 LOG(MODULE_ID, "main window design phase end.");
 	}
 
 	#ifdef USE_GTK3
@@ -132,11 +134,11 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 
 	if (gui_main_window != NULL)
 	{
-		struct gui_event e = {0};
-		e.type = GE_AFTER_PRESENT;
-		logging_log_message("main window initializing phase begin.");
-		gui_main_window(core, &e);
-		logging_log_message("main window initializing phase end.");
+	 struct gui_event e = {0};
+	 e.type = GE_AFTER_PRESENT;
+	 LOG(MODULE_ID, "main window initializing phase begin.");
+	 gui_main_window(core, &e);
+	 LOG(MODULE_ID, "main window initializing phase end.");
 	}
 	_gui_add_widget_to_internal_list(main_window);
 	return main_window;
