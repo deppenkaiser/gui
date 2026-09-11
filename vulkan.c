@@ -226,6 +226,8 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
 
 // === Idle mit Flag-Logik ===
 
+static bool _maximized_logged = false;
+
 static gboolean _gui_vulkan_idle_callback(gpointer user_data)
 {
     GtkWidget* vulkan_area = GTK_WIDGET(user_data);
@@ -259,6 +261,20 @@ static gboolean _gui_vulkan_idle_callback(gpointer user_data)
         }
         else
         {
+            GtkWindow* window = GTK_WINDOW(gtk_widget_get_root(vulkan_area));
+            if (window && gtk_window_is_maximized(window))
+            {
+                if (!_maximized_logged)
+                {
+                    _maximized_logged = true;
+                    LOG(MODULE_ID, "window is maximized");
+                }
+            }
+            else
+            {
+                _maximized_logged = false;
+            }
+
             result = G_SOURCE_CONTINUE;
         }
     }
