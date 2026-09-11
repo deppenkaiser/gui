@@ -1,4 +1,5 @@
 #include "main_window.h"
+#include "vulkan.h"
 #include "events.h"
 
 #include <api/api.h>
@@ -45,21 +46,23 @@ private void _gui_main_window_key_released(GtkEventControllerKey* self, guint ke
 
 private gboolean _gui_main_window_close_request(GtkWindow* self, gpointer user_data)
 {
-	gboolean close = FALSE;
+	gboolean stop = FALSE;
 	if (gui_main_window != NULL)
 	{
 		struct gui_event e = {0};
 		e.type = GE_CLOSE_REQUEST;
 		gui_main_window((gui_main_window_t) user_data, &e);
-		close = e.data.close_request.close;
+		if (e.data.close_request.close)
+		{
+			stop = FALSE;
+		}
+		else
+		{
+			stop = TRUE;
+		}
 	}
 
-	if (close == FALSE)
-	{
-		_gui_destroy_all_widget_cores();
-	}
-
-    return close;
+	return stop;
 }
 
 private void _gui_main_window_action_callback(GSimpleAction* simple_action, GVariant* parameter, gpointer user_data)

@@ -75,21 +75,21 @@ static Window _gui_get_x11_window(GtkWidget* widget)
 {
     if (!widget)
     {
-        LOG(MODULE_ID, "_gui_get_x11_window: widget is NULL");
+        LOG(MODULE_ID, "_gui_vulkan_get_x11_window: widget is NULL");
         return 0;
     }
 
     GtkNative* native = gtk_widget_get_native(widget);
     if (!native)
     {
-        LOG(MODULE_ID, "_gui_get_x11_window: widget %p has no native", widget);
+        LOG(MODULE_ID, "_gui_vulkan_get_x11_window: widget %p has no native", widget);
         return 0;
     }
 
     GdkSurface* surface = gtk_native_get_surface(native);
     if (!surface)
     {
-        LOG(MODULE_ID, "_gui_get_x11_window: native has no surface for widget %p", widget);
+        LOG(MODULE_ID, "_gui_vulkan_get_x11_window: native has no surface for widget %p", widget);
         return 0;
     }
 
@@ -196,31 +196,52 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
     }
 }
 
-// === Render ===
-static guint _gui_vulkan_timer_id = 0;
+// === Idle mit Flag-Logik ===
 
-static gboolean _gui_vulkan_timer_callback(gpointer user_data)
+static gboolean _gui_vulkan_idle_callback(gpointer user_data)
 {
     GtkWidget* vulkan_area = GTK_WIDGET(user_data);
-    gtk_widget_queue_draw(vulkan_area);
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_area);
+    
+    if (core == NULL)
+    {
+        return G_SOURCE_REMOVE;
+    }
+
+    if (core->need_close)
+    {
+        core->need_close = false;
+        core->need_render = false;
+        core->need_resize = false;
+        if (core->timer_id != 0)
+        {
+            g_source_remove(core->timer_id);
+            core->timer_id = 0;
+        }
+        gtk_widget_set_visible(vulkan_area, FALSE);
+        return G_SOURCE_REMOVE;
+    }
+
+    if (core->need_resize)
+    {
+        core->need_resize = false;
+        struct gui_event e = {0};
+        e.type = GE_VULKAN_RESIZE;
+        e.data.vulkan_resize.vulkan_area = vulkan_area;
+        e.data.vulkan_resize.surface = core->surface;
+        e.data.vulkan_resize.width = core->width;
+        e.data.vulkan_resize.height = core->height;
+        gui_vulkan(core, &e);
+        return G_SOURCE_CONTINUE;
+    }
+
+    if (core->need_render)
+    {
+        core->need_render = false;
+        gtk_widget_queue_draw(vulkan_area);
+    }
+
     return G_SOURCE_CONTINUE;
-}
-
-static void _gui_vulkan_start_render_timer(GtkWidget* vulkan_area)
-{
-    if (_gui_vulkan_timer_id == 0)
-    {
-        _gui_vulkan_timer_id = g_timeout_add(16, _gui_vulkan_timer_callback, vulkan_area);
-    }
-}
-
-static void _gui_vulkan_stop_render_timer(void)
-{
-    if (_gui_vulkan_timer_id != 0)
-    {
-        g_source_remove(_gui_vulkan_timer_id);
-        _gui_vulkan_timer_id = 0;
-    }
 }
 
 static void _gui_vulkan_render_callback(
@@ -233,17 +254,27 @@ static void _gui_vulkan_render_callback(
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint(cr);
+    
     gui_vulkan_t core = _gui_vulkan_get_core(GTK_WIDGET(drawing_area));
-    if (core && gui_vulkan != NULL)
+    if (core == NULL || core->initialized == false)
     {
-        struct gui_event e = {0};
-        e.type = GE_VULKAN_RENDER;
-        e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
-        e.data.vulkan_render.surface = core->surface;
-        e.data.vulkan_render.width = width;
-        e.data.vulkan_render.height = height;
-        gui_vulkan(core, &e);
+        return;
     }
+
+    if (core->width != width || core->height != height)
+    {
+        core->width = width;
+        core->height = height;
+        core->need_resize = true;
+    }
+
+    struct gui_event e = {0};
+    e.type = GE_VULKAN_RENDER;
+    e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
+    e.data.vulkan_render.surface = core->surface;
+    e.data.vulkan_render.width = width;
+    e.data.vulkan_render.height = height;
+    gui_vulkan(core, &e);
 }
 
 // === Öffentliche Funktionen ===
@@ -283,6 +314,10 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
     core->initialized = false;
     core->width = 0;
     core->height = 0;
+    core->timer_id = 0;
+    core->need_render = false;
+    core->need_close = false;
+    core->need_resize = false;
 
     _gui_vulkan_set_core(drawing_area, core);
 
@@ -293,7 +328,9 @@ GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data)
     g_signal_connect(drawing_area, "unrealize", G_CALLBACK(_gui_vulkan_unrealize_callback), NULL);
 
     _gui_add_widget_to_internal_list(drawing_area);
-    _gui_vulkan_start_render_timer(drawing_area);
+    
+    core->timer_id = g_idle_add(_gui_vulkan_idle_callback, drawing_area);
+    core->need_render = true;
 
     LOG(MODULE_ID, "gui_vulkan_create: SUCCESS - widget=%p, core=%p", drawing_area, core);
     return drawing_area;
@@ -367,7 +404,7 @@ void gui_vulkan_queue_render(GtkWidget* vulkan_widget)
         return;
     }
 
-    gtk_widget_queue_draw(vulkan_widget);
+    core->need_render = true;
     LOG(MODULE_ID, "gui_vulkan_queue_render: render queued for widget %p", vulkan_widget);
 }
 
@@ -383,4 +420,16 @@ void gui_vulkan_get_size(GtkWidget* vulkan_widget, int* width, int* height)
 
     if (width) *width = core->width;
     if (height) *height = core->height;
+}
+
+void _gui_vulkan_request_close(GtkWidget* vulkan_widget)
+{
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
+    if (!core)
+    {
+        return;
+    }
+    core->need_close = true;
+    core->need_render = false;
+    core->need_resize = false;
 }
