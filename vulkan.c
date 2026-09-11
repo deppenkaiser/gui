@@ -197,6 +197,9 @@ static void _gui_vulkan_unrealize_callback(GtkWidget* widget, gpointer user_data
 }
 
 // === Render ===
+static bool _gui_vulkan_is_rendering = false;
+
+// === Render ===
 static void _gui_vulkan_render_callback(
     GtkDrawingArea* drawing_area,
     cairo_t* cr,
@@ -204,18 +207,24 @@ static void _gui_vulkan_render_callback(
     int height,
     gpointer user_data)
 {
-    gui_vulkan_t core = _gui_vulkan_get_core(GTK_WIDGET(drawing_area));
-    if (!core) return;
-
-    if (gui_vulkan != NULL)
+    cairo_set_source_rgba(cr, 0, 0, 0, 0);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(cr);
+    if (!_gui_vulkan_is_rendering)
     {
-        struct gui_event e = {0};
-        e.type = GE_VULKAN_RENDER;
-        e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
-        e.data.vulkan_render.surface = core->surface;
-        e.data.vulkan_render.width = width;
-        e.data.vulkan_render.height = height;
-        gui_vulkan(core, &e);
+        _gui_vulkan_is_rendering = true;
+        gui_vulkan_t core = _gui_vulkan_get_core(GTK_WIDGET(drawing_area));
+        if (core && gui_vulkan != NULL)
+        {
+            struct gui_event e = {0};
+            e.type = GE_VULKAN_RENDER;
+            e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
+            e.data.vulkan_render.surface = core->surface;
+            e.data.vulkan_render.width = width;
+            e.data.vulkan_render.height = height;
+            gui_vulkan(core, &e);
+        }
+        _gui_vulkan_is_rendering = false;
     }
 }
 
