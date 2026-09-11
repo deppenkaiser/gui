@@ -262,17 +262,28 @@ static gboolean _gui_vulkan_idle_callback(gpointer user_data)
         else
         {
             GtkWindow* window = GTK_WINDOW(gtk_widget_get_root(vulkan_area));
-            if (window && gtk_window_is_maximized(window))
+            if (window)
             {
-                if (!_maximized_logged)
+                if (core->is_fullscreen)
+                {
+                    int current_width = gtk_widget_get_width(vulkan_area);
+                    int current_height = gtk_widget_get_height(vulkan_area);
+                    if (current_width > 0 && current_height > 0)
+                    {
+                        if (core->width != current_width || core->height != current_height)
+                        {
+                            core->width = current_width;
+                            core->height = current_height;
+                            core->need_resize = true;
+                            core->need_render = true;
+                        }
+                    }
+                }
+                else if (!_maximized_logged)
                 {
                     _maximized_logged = true;
                     LOG(MODULE_ID, "window is maximized");
                 }
-            }
-            else
-            {
-                _maximized_logged = false;
             }
 
             result = G_SOURCE_CONTINUE;
@@ -301,23 +312,26 @@ static void _gui_vulkan_render_callback(
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint(cr);
-    
+
     gui_vulkan_t core = _gui_vulkan_get_core(GTK_WIDGET(drawing_area));
     if (core && core->initialized)
     {
-        if (core->width != width || core->height != height)
+        if (!core->is_fullscreen)
         {
-            core->width = width;
-            core->height = height;
-            core->need_resize = true;
+            if (core->width != width || core->height != height)
+            {
+                core->width = width;
+                core->height = height;
+                core->need_resize = true;
+            }
         }
 
         struct gui_event e = {0};
         e.type = GE_VULKAN_RENDER;
         e.data.vulkan_render.vulkan_area = GTK_WIDGET(drawing_area);
         e.data.vulkan_render.surface = core->surface;
-        e.data.vulkan_render.width = width;
-        e.data.vulkan_render.height = height;
+        e.data.vulkan_render.width = core->width;
+        e.data.vulkan_render.height = core->height;
         gui_vulkan(core, &e);
     }
 }
@@ -491,5 +505,40 @@ void _gui_vulkan_request_close(GtkWidget* vulkan_widget)
         core->need_close = true;
         core->need_render = false;
         core->need_resize = false;
+    }
+}
+
+void gui_vulkan_enter_fullscreen(GtkWidget* vulkan_widget)
+{
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
+    if (core)
+    {
+        GtkWindow* window = GTK_WINDOW(gtk_widget_get_root(vulkan_widget));
+        if (window)
+        {
+            core->is_fullscreen = true;
+            gtk_window_fullscreen(window);
+            core->width = gtk_widget_get_width(vulkan_widget);
+            core->height = gtk_widget_get_height(vulkan_widget);
+            core->need_resize = true;
+            core->need_render = true;
+            LOG(MODULE_ID, "gui_vulkan_enter_fullscreen");
+        }
+    }
+}
+
+void gui_vulkan_leave_fullscreen(GtkWidget* vulkan_widget)
+{
+    gui_vulkan_t core = _gui_vulkan_get_core(vulkan_widget);
+    if (core)
+    {
+        GtkWindow* window = GTK_WINDOW(gtk_widget_get_root(vulkan_widget));
+        if (window)
+        {
+            gtk_window_unfullscreen(window);
+            core->is_fullscreen = false;
+            core->need_render = true;
+            LOG(MODULE_ID, "gui_vulkan_leave_fullscreen");
+        }
     }
 }

@@ -5,6 +5,7 @@
 #include <api/api.h>
 #include <string/string.h>
 #include <logging/logging.h>
+#include <vulkan.h>
 
 #define MODULE_ID "GUI"
 
@@ -15,19 +16,50 @@ extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 extern void _gui_destroy_all_widget_cores();
 
+static void _gui_main_window_maximized_changed(GObject* object, GParamSpec* spec, gpointer user_data)
+{
+    GtkWindow* window = GTK_WINDOW(object);
+    if (gtk_window_is_maximized(window))
+    {
+        GtkWidget* child = gtk_window_get_child(window);
+        if (child != NULL)
+        {
+            gui_vulkan_enter_fullscreen(child);
+        }
+    }
+}
+
 private gboolean _gui_main_window_key_pressed(GtkEventControllerKey* self, guint keyval, guint keycode, GdkModifierType state, gpointer user_data)
 {
     gboolean handled = FALSE;
-	if (gui_main_window != NULL)
-	{
-	struct gui_event e = {0};
-	e.type = GE_KEY_PRESSED;
-	e.data.key_pressed.keyval = keyval;
-	LOG(MODULE_ID, "key pressed event begin...");
-	gui_main_window((gui_main_window_t) user_data, &e);
-	LOG(MODULE_ID, "key pressed event end...");
-	handled = e.data.key_pressed.handled;
-	}
+    if (gui_main_window != NULL)
+    {
+        if (keyval == GDK_KEY_Escape)
+        {
+            LOG(MODULE_ID, "Escape pressed");
+            gui_main_window_t mw = (gui_main_window_t) user_data;
+            GtkWidget* child = gtk_window_get_child(GTK_WINDOW(mw->main_window));
+            if (child != NULL)
+            {
+                LOG(MODULE_ID, "Escape: leaving fullscreen");
+                gui_vulkan_leave_fullscreen(child);
+                gtk_window_unmaximize(GTK_WINDOW(mw->main_window));
+            }
+            else
+            {
+                LOG(MODULE_ID, "Escape: child is NULL");
+            }
+            handled = TRUE;
+        }
+        else
+        {
+            struct gui_event e = {0};
+            e.type = GE_KEY_PRESSED;
+            e.data.key_pressed.keyval = keyval;
+            gui_main_window((gui_main_window_t) user_data, &e);
+            handled = e.data.key_pressed.handled;
+        }
+    }
     return handled;
 }
 
@@ -121,6 +153,7 @@ GtkWidget* gui_main_window_create(GtkApplication* app, uint32_t width_pix, uint3
 
     g_signal_connect(core->keyboard_controller, "key-pressed", G_CALLBACK(_gui_main_window_key_pressed), core);
     g_signal_connect(core->keyboard_controller, "key-released", G_CALLBACK(_gui_main_window_key_released), core);
+    g_signal_connect(core->main_window, "notify::maximized", G_CALLBACK(_gui_main_window_maximized_changed), core);
 	#ifdef USE_GTK3
 	g_signal_connect(G_OBJECT(core.main_window), "delete-event", G_CALLBACK(_gui_main_window_close_request), &core);
 	#else
