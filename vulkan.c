@@ -136,10 +136,10 @@ static void _glfw_joystick_callback(int jid, int event)
 
 // === Window Creation ===
 
-gui_window_t gui_window_create(int width, int height, const char* title)
+gui_vulkan_window_t gui_vulkan_window_create(int width, int height, const char* title)
 {
-    gui_window_t result = NULL;
-    struct gui_window* window = NULL;
+    gui_vulkan_window_t result = NULL;
+    struct gui_vulkan_window* window = NULL;
 
     glfwSetErrorCallback(_glfw_error_callback);
     glfwSetJoystickCallback(_glfw_joystick_callback);
@@ -161,7 +161,7 @@ gui_window_t gui_window_create(int width, int height, const char* title)
         }
         else
         {
-            window = (struct gui_window*)malloc(sizeof(struct gui_window));
+            window = (struct gui_vulkan_window*)malloc(sizeof(struct gui_vulkan_window));
             if (!window)
             {
                 LOG(MODULE_ID, "failed to allocate window structure");
@@ -199,7 +199,7 @@ gui_window_t gui_window_create(int width, int height, const char* title)
     return result;
 }
 
-void gui_window_destroy(gui_window_t window)
+void gui_vulkan_window_destroy(gui_vulkan_window_t window)
 {
     if (window)
     {
@@ -212,7 +212,7 @@ void gui_window_destroy(gui_window_t window)
     }
 }
 
-bool gui_window_poll_events(gui_window_t window)
+bool gui_vulkan_window_poll_events(gui_vulkan_window_t window)
 {
     bool result = false;
 
@@ -226,7 +226,7 @@ bool gui_window_poll_events(gui_window_t window)
     return result;
 }
 
-bool gui_window_was_resized(gui_window_t window, int* width, int* height)
+bool gui_vulkan_window_was_resized(gui_vulkan_window_t window, int* width, int* height)
 {
     bool result = false;
 
@@ -246,7 +246,7 @@ bool gui_window_was_resized(gui_window_t window, int* width, int* height)
     return result;
 }
 
-VkSurfaceKHR gui_window_create_surface(VkInstance instance, gui_window_t window)
+VkSurfaceKHR gui_vulkan_window_create_surface(VkInstance instance, gui_vulkan_window_t window)
 {
     VkSurfaceKHR result = VK_NULL_HANDLE;
 
@@ -281,11 +281,11 @@ void gui_initialize_instance_config(vb_instance_config_t config)
 	config->layer_names = NULL;
 }
 
-bool gui_create_surface_device_and_swapchain(gui_window_t window, vb_instance_t instance, gui_glwf_resources_t resources)
+bool gui_vulkan_create_surface_device_and_swapchain(gui_vulkan_window_t window, vb_instance_t instance, gui_vulkan_resources_t resources)
 {
 	bool is_ok = false;
 	
-	resources->surface = gui_window_create_surface(instance->instance, window);
+	resources->surface = gui_vulkan_window_create_surface(instance->instance, window);
 	if (resources->surface != VK_NULL_HANDLE)
 	{
 		glfwWaitEventsTimeout(0.1);
@@ -321,7 +321,7 @@ bool gui_create_surface_device_and_swapchain(gui_window_t window, vb_instance_t 
 	return is_ok;
 }
 
-void gui_destroy_surface_device_and_swapchain(vb_instance_t instance, gui_glwf_resources_t resources)
+void gui_vulkan_destroy_surface_device_and_swapchain(vb_instance_t instance, gui_vulkan_resources_t resources)
 {
 	vg_swapchain_destroy(&resources->swapchain);
 	vg_device_destroy(&resources->device);
