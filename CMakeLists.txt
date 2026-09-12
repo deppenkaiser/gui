@@ -11,6 +11,7 @@ pkg_check_modules(X11 REQUIRED IMPORTED_TARGET x11)
 pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb)
 pkg_check_modules(X11_XCB REQUIRED IMPORTED_TARGET x11-xcb)
 pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
+pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c)
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -24,6 +25,7 @@ add_subdirectory(../string ${CMAKE_BINARY_DIR}/string_from_gui)
 add_subdirectory(../api ${CMAKE_BINARY_DIR}/api_from_gui)
 add_subdirectory(../vulkan_base ${CMAKE_BINARY_DIR}/vulkan_base_from_gui)
 add_subdirectory(../vulkan_graphics ${CMAKE_BINARY_DIR}/vulkan_graphics_from_gui)
+add_subdirectory(../json ${CMAKE_BINARY_DIR}/json_from_gui)
 
 target_sources(gui PRIVATE
 	gui.c
@@ -54,12 +56,14 @@ target_link_libraries(gui
 		PkgConfig::GTK4
 		PkgConfig::VULKAN
 		PkgConfig::GLFW
+		PkgConfig::JSONC
 		logging
 		threading
 		string
 		api
 		vulkan_base
 		vulkan_graphics
+		json
 	PRIVATE
 		${EPOXY_LIBRARIES}
 		${X11_LIBRARIES}
