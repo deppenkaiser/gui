@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <stdbool.h>
+#include <vulkan_base/vulkan_base.h>
 
 typedef struct gui_window
 {
@@ -18,3 +19,4 @@ gui_window_t gui_window_create(int width, int height, const char* title);
 void gui_window_destroy(gui_window_t window);
 bool gui_window_poll_events(gui_window_t window);
 VkSurfaceKHR gui_window_create_surface(VkInstance instance, gui_window_t window);
+void gui_initialize_instance_config(vb_instance_config_t config);

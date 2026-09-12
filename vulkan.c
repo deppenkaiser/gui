@@ -99,3 +99,13 @@ VkSurfaceKHR gui_window_create_surface(VkInstance instance, gui_window_t window)
 
     return result;
 }
+
+void gui_initialize_instance_config(vb_instance_config_t config)
+{
+	uint32_t ext_count = 0;
+	const char** ext = glfwGetRequiredInstanceExtensions(&ext_count);
+	config->extension_count = ext_count;
+	config->extension_names = ext;
+	config->layer_count = 0;
+	config->layer_names = NULL;
+}

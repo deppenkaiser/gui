@@ -22,6 +22,7 @@ add_subdirectory(../logging ${CMAKE_BINARY_DIR}/logging_from_gui)
 add_subdirectory(../threading ${CMAKE_BINARY_DIR}/threading_from_gui)
 add_subdirectory(../string ${CMAKE_BINARY_DIR}/string_from_gui)
 add_subdirectory(../api ${CMAKE_BINARY_DIR}/api_from_gui)
+add_subdirectory(../vulkan_base ${CMAKE_BINARY_DIR}/vulkan_base_from_gui)
 
 target_sources(gui PRIVATE
 	gui.c
@@ -55,6 +56,7 @@ target_link_libraries(gui
 		threading
 		string
 		api
+		vulkan_base
 	PRIVATE
 		${EPOXY_LIBRARIES}
 		${X11_LIBRARIES}
