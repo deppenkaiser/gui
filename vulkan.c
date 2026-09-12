@@ -4,10 +4,108 @@
 #include <logging/logging.h>
 #define MODULE_ID "GUI"
 
+// === Resize State ===
+static bool _window_resized = false;
+static int _new_width = 0;
+static int _new_height = 0;
+
+// === GLFW Callbacks ===
+
+static void _glfw_error_callback(int error, const char* description)
+{
+    LOG("GLFW", "error %d: %s", error, description);
+}
+
+static void _glfw_key_callback(GLFWwindow* handle, int key, int scancode, int action, int mods)
+{
+    LOG("GLFW", "key=%d scancode=%d action=%d mods=%d", key, scancode, action, mods);
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(handle, GLFW_TRUE);
+    }
+}
+
+static void _glfw_mouse_button_callback(GLFWwindow* handle, int button, int action, int mods)
+{
+    LOG("GLFW", "mouse_button=%d action=%d mods=%d", button, action, mods);
+}
+
+static void _glfw_cursor_pos_callback(GLFWwindow* handle, double x, double y)
+{
+    LOG("GLFW", "cursor_pos=%.2f,%.2f", x, y);
+}
+
+static void _glfw_scroll_callback(GLFWwindow* handle, double xoffset, double yoffset)
+{
+    LOG("GLFW", "scroll=%.2f,%.2f", xoffset, yoffset);
+}
+
+static void _glfw_framebuffer_size_callback(GLFWwindow* handle, int width, int height)
+{
+    LOG("GLFW", "framebuffer_size=%dx%d", width, height);
+    _window_resized = true;
+    _new_width = width;
+    _new_height = height;
+}
+
+static void _glfw_window_size_callback(GLFWwindow* handle, int width, int height)
+{
+    LOG("GLFW", "window_size=%dx%d", width, height);
+}
+
+static void _glfw_window_close_callback(GLFWwindow* handle)
+{
+    LOG("GLFW", "window_close");
+}
+
+static void _glfw_window_refresh_callback(GLFWwindow* handle)
+{
+    LOG("GLFW", "window_refresh");
+}
+
+static void _glfw_window_focus_callback(GLFWwindow* handle, int focused)
+{
+    LOG("GLFW", "window_focus=%d", focused);
+}
+
+static void _glfw_window_iconify_callback(GLFWwindow* handle, int iconified)
+{
+    LOG("GLFW", "window_iconify=%d", iconified);
+}
+
+static void _glfw_window_maximize_callback(GLFWwindow* handle, int maximized)
+{
+    LOG("GLFW", "window_maximize=%d", maximized);
+}
+
+static void _glfw_char_callback(GLFWwindow* handle, unsigned int codepoint)
+{
+    LOG("GLFW", "char=%u", codepoint);
+}
+
+static void _glfw_drop_callback(GLFWwindow* handle, int count, const char** paths)
+{
+    LOG("GLFW", "drop count=%d", count);
+    for (int i = 0; i < count; i++)
+    {
+        LOG("GLFW", "  path[%d]=%s", i, paths[i]);
+    }
+}
+
+static void _glfw_joystick_callback(int jid, int event)
+{
+    LOG("GLFW", "joystick jid=%d event=%d", jid, event);
+}
+
+// === Window Creation ===
+
 gui_window_t gui_window_create(int width, int height, const char* title)
 {
     gui_window_t result = NULL;
     struct gui_window* window = NULL;
+
+    glfwSetErrorCallback(_glfw_error_callback);
+    glfwSetJoystickCallback(_glfw_joystick_callback);
 
     if (!glfwInit())
     {
@@ -40,6 +138,22 @@ gui_window_t gui_window_create(int width, int height, const char* title)
                 window->height = height;
                 window->title = title;
                 window->should_close = false;
+
+                // Register all callbacks
+                glfwSetKeyCallback(handle, _glfw_key_callback);
+                glfwSetMouseButtonCallback(handle, _glfw_mouse_button_callback);
+                glfwSetCursorPosCallback(handle, _glfw_cursor_pos_callback);
+                glfwSetScrollCallback(handle, _glfw_scroll_callback);
+                glfwSetFramebufferSizeCallback(handle, _glfw_framebuffer_size_callback);
+                glfwSetWindowSizeCallback(handle, _glfw_window_size_callback);
+                glfwSetWindowCloseCallback(handle, _glfw_window_close_callback);
+                glfwSetWindowRefreshCallback(handle, _glfw_window_refresh_callback);
+                glfwSetWindowFocusCallback(handle, _glfw_window_focus_callback);
+                glfwSetWindowIconifyCallback(handle, _glfw_window_iconify_callback);
+                glfwSetWindowMaximizeCallback(handle, _glfw_window_maximize_callback);
+                glfwSetCharCallback(handle, _glfw_char_callback);
+                glfwSetDropCallback(handle, _glfw_drop_callback);
+
                 result = window;
             }
         }
@@ -79,18 +193,17 @@ bool gui_window_was_resized(gui_window_t window, int* width, int* height)
 {
     bool result = false;
 
-    if (window && window->handle)
+    if (_window_resized)
     {
-        int current_width, current_height;
-        glfwGetWindowSize(window->handle, &current_width, &current_height);
-        if (current_width != window->width || current_height != window->height)
+        _window_resized = false;
+        if (window)
         {
-            window->width = current_width;
-            window->height = current_height;
-            if (width) *width = current_width;
-            if (height) *height = current_height;
-            result = true;
+            window->width = _new_width;
+            window->height = _new_height;
         }
+        if (width) *width = _new_width;
+        if (height) *height = _new_height;
+        result = true;
     }
 
     return result;
