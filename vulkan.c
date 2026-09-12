@@ -9,6 +9,13 @@ static bool _window_resized = false;
 static int _new_width = 0;
 static int _new_height = 0;
 
+// === Fullscreen State ===
+static bool _is_fullscreen = false;
+static int _windowed_xpos = 0;
+static int _windowed_ypos = 0;
+static int _windowed_width = 800;
+static int _windowed_height = 600;
+
 // === GLFW Callbacks ===
 
 static void _glfw_error_callback(int error, const char* description)
@@ -21,7 +28,16 @@ static void _glfw_key_callback(GLFWwindow* handle, int key, int scancode, int ac
     LOG("GLFW", "key=%d scancode=%d action=%d mods=%d", key, scancode, action, mods);
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
-        glfwSetWindowShouldClose(handle, GLFW_TRUE);
+        if (_is_fullscreen)
+        {
+            LOG("GLFW", "exiting fullscreen via ESC");
+            _is_fullscreen = false;
+            glfwSetWindowMonitor(handle, NULL, _windowed_xpos, _windowed_ypos, _windowed_width, _windowed_height, 0);
+        }
+        else
+        {
+            glfwSetWindowShouldClose(handle, GLFW_TRUE);
+        }
     }
 }
 
@@ -75,7 +91,28 @@ static void _glfw_window_iconify_callback(GLFWwindow* handle, int iconified)
 
 static void _glfw_window_maximize_callback(GLFWwindow* handle, int maximized)
 {
-    LOG("GLFW", "window_maximize=%d", maximized);
+    if (maximized)
+    {
+        LOG("GLFW", "entering fullscreen");
+        _is_fullscreen = true;
+
+        // Save current windowed position and size
+        glfwGetWindowPos(handle, &_windowed_xpos, &_windowed_ypos);
+        glfwGetWindowSize(handle, &_windowed_width, &_windowed_height);
+
+        // Switch to fullscreen on primary monitor
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        glfwSetWindowMonitor(handle, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    }
+    else
+    {
+        LOG("GLFW", "exiting fullscreen");
+        _is_fullscreen = false;
+
+        // Restore windowed mode
+        glfwSetWindowMonitor(handle, NULL, _windowed_xpos, _windowed_ypos, _windowed_width, _windowed_height, 0);
+    }
 }
 
 static void _glfw_char_callback(GLFWwindow* handle, unsigned int codepoint)
