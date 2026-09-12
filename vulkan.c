@@ -1,8 +1,21 @@
 #include "vulkan.h"
 
+#include <api/api.h>
 #include <stdlib.h>
 #include <logging/logging.h>
 #define MODULE_ID "GUI"
+
+callback_declaration(void, gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_index));
+
+static void _gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_index)
+{
+	if (gui_vulkan_render)
+	{
+		gui_vulkan_render(resources, image_index);
+	}
+
+    vg_renderer_draw_triangle(&resources->renderer);
+}
 
 // === Resize State ===
 static bool _window_resized = false;
@@ -212,7 +225,7 @@ void gui_vulkan_window_destroy(gui_vulkan_window_t window)
     }
 }
 
-bool gui_vulkan_window_poll_events(gui_vulkan_window_t window)
+bool gui_vulkan_window_poll_events(gui_vulkan_window_t window, gui_vulkan_resources_t resources)
 {
     bool result = false;
 
@@ -221,6 +234,37 @@ bool gui_vulkan_window_poll_events(gui_vulkan_window_t window)
         glfwPollEvents();
         window->should_close = glfwWindowShouldClose(window->handle);
         result = !window->should_close;
+
+        if (result && resources)
+        {
+            int new_width, new_height;
+            if (gui_vulkan_window_was_resized(window, &new_width, &new_height))
+            {
+                vg_renderer_wait_idle(&resources->renderer);
+                vg_renderer_destroy(&resources->renderer);
+                vg_swapchain_recreate(&resources->swapchain, (uint32_t)new_width, (uint32_t)new_height);
+                vg_renderer_create(&resources->swapchain, &resources->renderer);
+            }
+
+            uint32_t image_index = 0;
+            if (vg_renderer_begin_frame(&resources->renderer, &image_index))
+            {
+                _gui_vulkan_render(resources, image_index);
+                vg_renderer_end_frame(&resources->renderer, image_index);
+            }
+            else
+            {
+                vg_result_t err = vg_get_last_error();
+                if (err == VG_ERROR_SWAPCHAIN_ERROR)
+                {
+                    glfwGetWindowSize(window->handle, &new_width, &new_height);
+                    vg_renderer_wait_idle(&resources->renderer);
+                    vg_renderer_destroy(&resources->renderer);
+                    vg_swapchain_recreate(&resources->swapchain, (uint32_t)new_width, (uint32_t)new_height);
+                    vg_renderer_create(&resources->swapchain, &resources->renderer);
+                }
+            }
+        }
     }
 
     return result;

@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <stdbool.h>
+#include <api/api.h>
 #include <vulkan_base/vulkan_base.h>
 #include <vulkan_graphics/vulkan_graphics.h>
 
