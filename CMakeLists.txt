@@ -45,10 +45,12 @@ target_sources(gui PRIVATE
 	gl.c
 	vulkan.c
 	gui_vulkan_controls.c
+	gui_vulkan_config.c
 )
 
 target_include_directories(gui PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/../json
 )
 
 target_link_libraries(gui
