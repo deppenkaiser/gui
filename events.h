@@ -1,7 +1,6 @@
 #pragma once
 
 #include <gtk/gtk.h>
-#include <vulkan/vulkan.h>
 
 typedef enum
 {
@@ -21,14 +20,9 @@ typedef enum
 	GE_DIALOG_DESTROY,
 	GE_DIALOG_CLOSE_REQUEST,
 	GE_GL_RENDER,
-	GE_GL_REALIZE,
-	GE_VULKAN_REALIZE,
-	GE_VULKAN_RENDER,
-	GE_VULKAN_RESIZE,
-	GE_VULKAN_UNREALIZE
+	GE_GL_REALIZE
 } gui_event_type_t;
 
-// === Bestehende Event-Strukturen ===
 typedef struct _gui_before_present
 {
 	uint32_t dummy;
@@ -93,40 +87,6 @@ typedef struct _gui_dialog_close_request_event
 	bool close;
 } *gui_dialog_close_request_event_t;
 
-// === Vulkan-Event-Strukturen ===
-typedef struct _gui_vulkan_realize_event
-{
-	GtkWidget* vulkan_area;
-	VkSurfaceKHR surface;
-	uint32_t width;
-	uint32_t height;
-} *gui_vulkan_realize_event_t;
-
-typedef struct _gui_vulkan_render_event
-{
-	GtkWidget* vulkan_area;
-	VkSurfaceKHR surface;
-	uint32_t width;
-	uint32_t height;
-} *gui_vulkan_render_event_t;
-
-typedef struct _gui_vulkan_resize_event
-{
-	GtkWidget* vulkan_area;
-	VkSurfaceKHR surface;
-	uint32_t width;
-	uint32_t height;
-	uint32_t old_width;
-	uint32_t old_height;
-} *gui_vulkan_resize_event_t;
-
-typedef struct _gui_vulkan_unrealize_event
-{
-	GtkWidget* vulkan_area;
-	VkSurfaceKHR surface;
-} *gui_vulkan_unrealize_event_t;
-
-// === Union aller Event-Daten ===
 typedef union _gui_event_data
 {
 	struct _gui_before_present before_present;
@@ -140,13 +100,8 @@ typedef union _gui_event_data
 	struct _gui_b_toggled_event b_toggled;
 	struct _gui_dialog_destroy_event dialog_destroy;
 	struct _gui_dialog_close_request_event dialog_close_request;
-	struct _gui_vulkan_realize_event vulkan_realize;
-	struct _gui_vulkan_render_event vulkan_render;
-	struct _gui_vulkan_resize_event vulkan_resize;
-	struct _gui_vulkan_unrealize_event vulkan_unrealize;
 } *gui_event_data_t;
 
-// === Haupt-Event-Struktur ===
 typedef struct gui_event
 {
 	gui_event_type_t type;
