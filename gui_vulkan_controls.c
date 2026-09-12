@@ -294,16 +294,24 @@ static void _gui_draw_rect(gui_draw_context_t* ctx, int x, int y, int w, int h, 
     uint32_t base = ctx->vertex_count;
     float* v = &ctx->vertices[base * 5];
     
-    // Bottom-left
-    v[0] = left;  v[1] = bottom; v[2] = r; v[3] = g; v[4] = b;
-    // Bottom-right
-    v[5] = right; v[6] = bottom; v[7] = r; v[8] = g; v[9] = b;
-    // Top-right
-    v[10] = right; v[11] = top; v[12] = r; v[13] = g; v[14] = b;
-    // Top-left
-    v[15] = left;  v[16] = top; v[17] = r; v[18] = g; v[19] = b;
+    // 6 vertices for 2 triangles
+    // Triangle 1: bottom-left, bottom-right, top-right
+    // Triangle 2: bottom-right, top-right, top-left
     
-    ctx->vertex_count += 4;
+    // Vertex 0: bottom-left
+    v[0] = left;  v[1] = bottom; v[2] = r; v[3] = g; v[4] = b;
+    // Vertex 1: bottom-right
+    v[5] = right; v[6] = bottom; v[7] = r; v[8] = g; v[9] = b;
+    // Vertex 2: top-right
+    v[10] = right; v[11] = top; v[12] = r; v[13] = g; v[14] = b;
+    // Vertex 3: bottom-left (again for triangle 2)
+    v[15] = left; v[16] = bottom; v[17] = r; v[18] = g; v[19] = b;
+    // Vertex 4: top-right (again for triangle 2)
+    v[20] = right; v[21] = top; v[22] = r; v[23] = g; v[24] = b;
+    // Vertex 5: top-left
+    v[25] = left; v[26] = top; v[27] = r; v[28] = g; v[29] = b;
+    
+    ctx->vertex_count += 6;
 }
 
 // === Control Drawing ===
@@ -326,9 +334,11 @@ static void _gui_draw_label(gui_draw_context_t* ctx, gui_control_t control)
     if (text_len > 0)
     {
         int text_w = text_len * 6;
+        int text_h = r->height / 2;
+        if (text_h < 22) text_h = 22;
         int text_x = r->x + 5;
-        int text_y = r->y + (r->height - 8) / 2;
-        _gui_draw_rect(ctx, text_x, text_y, text_w, 8, 0.9f, 0.9f, 0.9f);
+        int text_y = r->y + (r->height - text_h) / 2;
+        _gui_draw_rect(ctx, text_x, text_y, text_w, text_h, 0.9f, 0.9f, 0.9f);
     }
 }
 
@@ -360,9 +370,11 @@ static void _gui_draw_button(gui_draw_context_t* ctx, gui_control_t control)
     if (text_len > 0)
     {
         int text_w = text_len * 6;
+        int text_h = r->height / 2;  // Proportional zur Control-Höhe
+        if (text_h < 22) text_h = 22; // Mindesthöhe
         int text_x = r->x + (r->width - text_w) / 2;
-        int text_y = r->y + (r->height - 8) / 2;
-        _gui_draw_rect(ctx, text_x, text_y, text_w, 8, 1.0f, 1.0f, 1.0f);
+        int text_y = r->y + (r->height - text_h) / 2;
+        _gui_draw_rect(ctx, text_x, text_y, text_w, text_h, 1.0f, 1.0f, 1.0f);
     }
 }
 
