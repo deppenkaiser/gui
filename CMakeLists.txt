@@ -42,6 +42,7 @@ target_sources(gui PRIVATE
 	box.c
 	gl.c
 	vulkan.c
+	gui_vulkan_controls.c
 )
 
 target_include_directories(gui PUBLIC

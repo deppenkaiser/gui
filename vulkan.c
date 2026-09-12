@@ -1,4 +1,5 @@
 #include "vulkan.h"
+#include "gui_vulkan_controls.h"
 
 #include <api/api.h>
 #include <stdlib.h>
@@ -37,12 +38,14 @@ static int _windowed_height = 600;
 
 static void _gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_index)
 {
-	if (gui_vulkan_render)
-	{
-		gui_vulkan_render(resources, image_index);
-	}
-
-    vg_renderer_draw_triangle(&resources->renderer);
+    if (gui_vulkan_render)
+    {
+        gui_vulkan_render(resources, image_index);
+    }
+    else
+    {
+        vg_renderer_draw_triangle(&resources->renderer);
+    }
 }
 
 // === GLFW Callbacks ===
@@ -320,6 +323,16 @@ bool gui_vulkan_window_poll_events(gui_vulkan_window_t window, gui_vulkan_resour
             if (vg_renderer_begin_frame(&resources->renderer, &image_index))
             {
                 _gui_vulkan_render(resources, image_index);
+                
+                // Draw controls
+                if (resources->controls)
+                {
+                    int width, height;
+                    glfwGetWindowSize(window->handle, &width, &height);
+                    gui_controls_cleanup_pending(resources->device.device);
+                    gui_controls_draw_internal(resources->controls, resources->renderer.current_command_buffer, resources->device.device, resources->device.physical_device, (uint32_t)width, (uint32_t)height);
+                }
+                
                 vg_renderer_end_frame(&resources->renderer, image_index);
             }
             else

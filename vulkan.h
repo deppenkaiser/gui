@@ -24,6 +24,7 @@ typedef struct gui_vulkan_resources
     struct vg_device device;
     struct vg_swapchain swapchain;
     struct vg_renderer renderer;
+    struct gui_controls* controls;
 }* gui_vulkan_resources_t;
 
 gui_vulkan_window_t gui_vulkan_window_create(int width, int height, const char* title);
