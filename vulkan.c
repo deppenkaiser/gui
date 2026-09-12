@@ -9,21 +9,21 @@
 callback_declaration(void, gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_index));
 callback_declaration(bool, gui_vulkan_load(gui_vulkan_resources_t resources));
 callback_declaration(void, gui_vulkan_setup(gui_vulkan_resources_t resources));
-callback_declaration(void, gui_vulkan_error(int error, const char* description));
-callback_declaration(void, gui_vulkan_key(GLFWwindow* window, int key, int scancode, int action, int mods));
-callback_declaration(void, gui_vulkan_mouse_button(GLFWwindow* window, int button, int action, int mods));
-callback_declaration(void, gui_vulkan_cursor_pos(GLFWwindow* window, double x, double y));
-callback_declaration(void, gui_vulkan_scroll(GLFWwindow* window, double xoffset, double yoffset));
-callback_declaration(void, gui_vulkan_char(GLFWwindow* window, unsigned int codepoint));
-callback_declaration(void, gui_vulkan_drop(GLFWwindow* window, int count, const char** paths));
-callback_declaration(void, gui_vulkan_joystick(int jid, int event));
-callback_declaration(void, gui_vulkan_framebuffer_resize(GLFWwindow* window, int width, int height));
-callback_declaration(void, gui_vulkan_window_resize(GLFWwindow* window, int width, int height));
-callback_declaration(void, gui_vulkan_window_close(GLFWwindow* window));
-callback_declaration(void, gui_vulkan_window_refresh(GLFWwindow* window));
-callback_declaration(void, gui_vulkan_window_focus(GLFWwindow* window, int focused));
-callback_declaration(void, gui_vulkan_window_iconify(GLFWwindow* window, int iconified));
-callback_declaration(void, gui_vulkan_window_maximize(GLFWwindow* window, int maximized));
+callback_declaration(void, gui_vulkan_custom_error(int error, const char* description));
+callback_declaration(void, gui_vulkan_custom_key(GLFWwindow* window, int key, int scancode, int action, int mods));
+callback_declaration(void, gui_vulkan_custom_mouse_button(GLFWwindow* window, int button, int action, int mods));
+callback_declaration(void, gui_vulkan_custom_cursor_pos(GLFWwindow* window, double x, double y));
+callback_declaration(void, gui_vulkan_custom_scroll(GLFWwindow* window, double xoffset, double yoffset));
+callback_declaration(void, gui_vulkan_custom_char(GLFWwindow* window, unsigned int codepoint));
+callback_declaration(void, gui_vulkan_custom_drop(GLFWwindow* window, int count, const char** paths));
+callback_declaration(void, gui_vulkan_custom_joystick(int jid, int event));
+callback_declaration(void, gui_vulkan_custom_framebuffer_resize(GLFWwindow* window, int width, int height));
+callback_declaration(void, gui_vulkan_custom_window_resize(GLFWwindow* window, int width, int height));
+callback_declaration(void, gui_vulkan_custom_window_close(GLFWwindow* window));
+callback_declaration(void, gui_vulkan_custom_window_refresh(GLFWwindow* window));
+callback_declaration(void, gui_vulkan_custom_window_focus(GLFWwindow* window, int focused));
+callback_declaration(void, gui_vulkan_custom_window_iconify(GLFWwindow* window, int iconified));
+callback_declaration(void, gui_vulkan_custom_window_maximize(GLFWwindow* window, int maximized));
 
 // === Resize State ===
 static bool _window_resized = false;
@@ -54,9 +54,9 @@ static void _gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_
 static void _glfw_error_callback(int error, const char* description)
 {
 	LOG("GLFW", "error %d: %s", error, description);	
-	if (gui_vulkan_error)
+	if (gui_vulkan_custom_error)
 	{
-		gui_vulkan_error(error, description);
+		gui_vulkan_custom_error(error, description);
 	}
 }
 
@@ -85,9 +85,9 @@ static void _glfw_key_callback(GLFWwindow* handle, int key, int scancode, int ac
     }
     
     // App callback for custom logic
-    if (gui_vulkan_key)
+    if (gui_vulkan_custom_key)
     {
-        gui_vulkan_key(handle, key, scancode, action, mods);
+        gui_vulkan_custom_key(handle, key, scancode, action, mods);
     }
 }
 
@@ -103,9 +103,9 @@ static void _glfw_mouse_button_callback(GLFWwindow* handle, int button, int acti
     }
     
     // App callback for custom logic
-    if (gui_vulkan_mouse_button)
+    if (gui_vulkan_custom_mouse_button)
     {
-        gui_vulkan_mouse_button(handle, button, action, mods);
+        gui_vulkan_custom_mouse_button(handle, button, action, mods);
     }
 }
 
@@ -121,9 +121,9 @@ static void _glfw_cursor_pos_callback(GLFWwindow* handle, double x, double y)
     }
     
     // App callback for custom logic
-    if (gui_vulkan_cursor_pos)
+    if (gui_vulkan_custom_cursor_pos)
     {
-        gui_vulkan_cursor_pos(handle, x, y);
+        gui_vulkan_custom_cursor_pos(handle, x, y);
     }
 }
 
@@ -139,9 +139,9 @@ static void _glfw_char_callback(GLFWwindow* handle, unsigned int codepoint)
     }
     
     // App callback for custom logic
-    if (gui_vulkan_char)
+    if (gui_vulkan_custom_char)
     {
-        gui_vulkan_char(handle, codepoint);
+        gui_vulkan_custom_char(handle, codepoint);
     }
 }
 
@@ -151,54 +151,54 @@ static void _glfw_framebuffer_size_callback(GLFWwindow* handle, int width, int h
     _window_resized = true;
     _new_width = width;
     _new_height = height;
-    if (gui_vulkan_framebuffer_resize)
+    if (gui_vulkan_custom_framebuffer_resize)
     {
-        gui_vulkan_framebuffer_resize(handle, width, height);
+        gui_vulkan_custom_framebuffer_resize(handle, width, height);
     }
 }
 
 static void _glfw_window_size_callback(GLFWwindow* handle, int width, int height)
 {
     LOG("GLFW", "window_size=%dx%d", width, height);
-    if (gui_vulkan_window_resize)
+    if (gui_vulkan_custom_window_resize)
     {
-        gui_vulkan_window_resize(handle, width, height);
+        gui_vulkan_custom_window_resize(handle, width, height);
     }
 }
 
 static void _glfw_window_close_callback(GLFWwindow* handle)
 {
     LOG("GLFW", "window_close");
-    if (gui_vulkan_window_close)
+    if (gui_vulkan_custom_window_close)
     {
-        gui_vulkan_window_close(handle);
+        gui_vulkan_custom_window_close(handle);
     }
 }
 
 static void _glfw_window_refresh_callback(GLFWwindow* handle)
 {
     LOG("GLFW", "window_refresh");
-    if (gui_vulkan_window_refresh)
+    if (gui_vulkan_custom_window_refresh)
     {
-        gui_vulkan_window_refresh(handle);
+        gui_vulkan_custom_window_refresh(handle);
     }
 }
 
 static void _glfw_window_focus_callback(GLFWwindow* handle, int focused)
 {
     LOG("GLFW", "window_focus=%d", focused);
-    if (gui_vulkan_window_focus)
+    if (gui_vulkan_custom_window_focus)
     {
-        gui_vulkan_window_focus(handle, focused);
+        gui_vulkan_custom_window_focus(handle, focused);
     }
 }
 
 static void _glfw_window_iconify_callback(GLFWwindow* handle, int iconified)
 {
     LOG("GLFW", "window_iconify=%d", iconified);
-    if (gui_vulkan_window_iconify)
+    if (gui_vulkan_custom_window_iconify)
     {
-        gui_vulkan_window_iconify(handle, iconified);
+        gui_vulkan_custom_window_iconify(handle, iconified);
     }
 }
 
@@ -220,18 +220,18 @@ static void _glfw_window_maximize_callback(GLFWwindow* handle, int maximized)
         _is_fullscreen = false;
         glfwSetWindowMonitor(handle, NULL, _windowed_xpos, _windowed_ypos, _windowed_width, _windowed_height, 0);
     }
-    if (gui_vulkan_window_maximize)
+    if (gui_vulkan_custom_window_maximize)
     {
-        gui_vulkan_window_maximize(handle, maximized);
+        gui_vulkan_custom_window_maximize(handle, maximized);
     }
 }
 
 static void _glfw_scroll_callback(GLFWwindow* handle, double xoffset, double yoffset)
 {
     LOG("GLFW", "scroll=%.2f,%.2f", xoffset, yoffset);
-    if (gui_vulkan_scroll)
+    if (gui_vulkan_custom_scroll)
     {
-        gui_vulkan_scroll(handle, xoffset, yoffset);
+        gui_vulkan_custom_scroll(handle, xoffset, yoffset);
     }
 }
 
@@ -242,18 +242,18 @@ static void _glfw_drop_callback(GLFWwindow* handle, int count, const char** path
     {
         LOG("GLFW", "  path[%d]=%s", i, paths[i]);
     }
-    if (gui_vulkan_drop)
+    if (gui_vulkan_custom_drop)
     {
-        gui_vulkan_drop(handle, count, paths);
+        gui_vulkan_custom_drop(handle, count, paths);
     }
 }
 
 static void _glfw_joystick_callback(int jid, int event)
 {
     LOG("GLFW", "joystick jid=%d event=%d", jid, event);
-    if (gui_vulkan_joystick)
+    if (gui_vulkan_custom_joystick)
     {
-        gui_vulkan_joystick(jid, event);
+        gui_vulkan_custom_joystick(jid, event);
     }
 }
 
