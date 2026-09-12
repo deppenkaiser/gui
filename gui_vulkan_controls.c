@@ -7,6 +7,37 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
+// === Animation System ===
+
+typedef struct gui_anim
+{
+    float r, g, b;
+    float target_r, target_g, target_b;
+} gui_anim_t;
+
+#define MAX_ANIM 32
+static gui_anim_t _anims[MAX_ANIM];
+
+static gui_anim_t* _anim_for(gui_control_t c)
+{
+    return &_anims[(uintptr_t)c % MAX_ANIM];
+}
+
+static void _anim_set(gui_anim_t* a, float r, float g, float b)
+{
+    a->target_r = r;
+    a->target_g = g;
+    a->target_b = b;
+}
+
+static void _anim_tick(gui_anim_t* a)
+{
+    float s = 0.15f;
+    a->r += (a->target_r - a->r) * s;
+    a->g += (a->target_g - a->g) * s;
+    a->b += (a->target_b - a->b) * s;
+}
+
 // === Pending Buffer Destruction ===
 
 typedef struct gui_pending_buffer
@@ -346,18 +377,24 @@ static void _gui_draw_button(gui_draw_context_t* ctx, gui_control_t control)
 {
     gui_control_rect_t* r = &control->rect;
     
-    float bg_r = 0.25f, bg_g = 0.45f, bg_b = 0.75f;
+    gui_anim_t* anim = _anim_for(control);
+    
+    // Determine target based on state
+    float target_r = 0.25f, target_g = 0.45f, target_b = 0.75f;
     if (control->state.hovered)
     {
-        bg_r = 0.35f; bg_g = 0.55f; bg_b = 0.85f;
+        target_r = 0.35f; target_g = 0.55f; target_b = 0.85f;
     }
     if (control->state.pressed)
     {
-        bg_r = 0.15f; bg_g = 0.35f; bg_b = 0.65f;
+        target_r = 0.15f; target_g = 0.35f; target_b = 0.65f;
     }
     
-    // Background
-    _gui_draw_rect(ctx, r->x, r->y, r->width, r->height, bg_r, bg_g, bg_b);
+    _anim_set(anim, target_r, target_g, target_b);
+    _anim_tick(anim);
+    
+    // Background with animated color
+    _gui_draw_rect(ctx, r->x, r->y, r->width, r->height, anim->r, anim->g, anim->b);
     
     // Border (3D effect)
     _gui_draw_rect(ctx, r->x, r->y, r->width, 1, 0.6f, 0.6f, 0.6f);
@@ -370,8 +407,8 @@ static void _gui_draw_button(gui_draw_context_t* ctx, gui_control_t control)
     if (text_len > 0)
     {
         int text_w = text_len * 6;
-        int text_h = r->height / 2;  // Proportional zur Control-Höhe
-        if (text_h < 22) text_h = 22; // Mindesthöhe
+        int text_h = r->height / 2;
+        if (text_h < 22) text_h = 22;
         int text_x = r->x + (r->width - text_w) / 2;
         int text_y = r->y + (r->height - text_h) / 2;
         _gui_draw_rect(ctx, text_x, text_y, text_w, text_h, 1.0f, 1.0f, 1.0f);
