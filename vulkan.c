@@ -6,6 +6,7 @@
 #define MODULE_ID "GUI"
 
 callback_declaration(void, gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_index));
+callback_declaration(bool, gui_vulkan_load(gui_vulkan_resources_t resources));
 callback_declaration(void, gui_vulkan_error(int error, const char* description));
 callback_declaration(void, gui_vulkan_key(GLFWwindow* window, int key, int scancode, int action, int mods));
 callback_declaration(void, gui_vulkan_mouse_button(GLFWwindow* window, int button, int action, int mods));
@@ -420,8 +421,17 @@ bool gui_vulkan_create_resources(gui_vulkan_window_t window, gui_vulkan_resource
 
 			if (vg_device_create(&resources->instance, resources->surface, &device_config, &resources->device))
 			{
-				int width = 0, height = 0;
+				if (gui_vulkan_load)
+				{
+					if (!gui_vulkan_load(resources))
+					{
+						is_ok = false;
+						gui_vulkan_destroy_resources(resources);
+						return is_ok;
+					}
+				}
 
+				int width = 0, height = 0;
 				glfwGetWindowSize(window->handle, &width, &height);
 				struct vg_swapchain_config swap_config =
 				{
@@ -433,10 +443,10 @@ bool gui_vulkan_create_resources(gui_vulkan_window_t window, gui_vulkan_resource
 				};
 
 				is_ok = vg_swapchain_create(&resources->device, resources->surface, &swap_config, &resources->swapchain);
-            if (is_ok)
-            {
-                is_ok = vg_renderer_create(&resources->swapchain, &resources->renderer);
-            }
+				if (is_ok)
+				{
+					is_ok = vg_renderer_create(&resources->swapchain, &resources->renderer);
+				}
 			}
 		}
 	}
