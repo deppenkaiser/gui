@@ -6,9 +6,10 @@
 #include <logging/logging.h>
 #define MODULE_ID "GUI"
 
-callback_declaration(void, gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_index));
+callback_declaration(void, gui_vulkan_custom_render(gui_vulkan_resources_t resources, uint32_t image_index));
 callback_declaration(bool, gui_vulkan_load(gui_vulkan_resources_t resources));
 callback_declaration(void, gui_vulkan_setup(gui_vulkan_resources_t resources));
+callback_declaration(void, gui_vulkan_custom_loop(gui_vulkan_resources_t resources));
 callback_declaration(void, gui_vulkan_custom_error(int error, const char* description));
 callback_declaration(void, gui_vulkan_custom_key(GLFWwindow* window, int key, int scancode, int action, int mods));
 callback_declaration(void, gui_vulkan_custom_mouse_button(GLFWwindow* window, int button, int action, int mods));
@@ -37,11 +38,17 @@ static int _windowed_ypos = 0;
 static int _windowed_width = 800;
 static int _windowed_height = 600;
 
+typedef struct gui_app_data
+{
+    gui_vulkan_window_t window;
+    struct gui_vulkan_resources resources;
+}* gui_app_data_t;
+
 static void _gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_index)
 {
-    if (gui_vulkan_render)
+    if (gui_vulkan_custom_render)
     {
-        gui_vulkan_render(resources, image_index);
+        gui_vulkan_custom_render(resources, image_index);
     }
     else
     {
@@ -523,4 +530,37 @@ void gui_vulkan_destroy_resources(gui_vulkan_resources_t resources)
 	vg_device_destroy(&resources->device);
 	vkDestroySurfaceKHR(resources->instance.instance, resources->surface, NULL);
 	resources->surface = NULL;
+}
+
+int gui_run(int argc, char** argv, uint32_t width, uint32_t height, const char* app_name)
+{
+    int result = -1;
+
+    struct gui_app_data data =
+    {
+        .window = gui_vulkan_window_create(width, height, app_name)
+    };
+
+    if (data.window)
+    {
+        if (gui_vulkan_create_resources(data.window, &data.resources))
+        {
+            while (gui_vulkan_window_poll_events(data.window, &data.resources))
+            {
+				// Custom loop callback for app logic (thread loop, etc.)
+				if (gui_vulkan_custom_loop)
+				{
+					gui_vulkan_custom_loop(&data.resources);
+				}
+            }
+
+            result = 0;
+            gui_vulkan_destroy_resources(&data.resources);
+        }
+
+        vb_shutdown(&data.resources.instance);
+        gui_vulkan_window_destroy(data.window);
+    }
+
+    return result;
 }

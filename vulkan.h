@@ -34,3 +34,4 @@ bool gui_vulkan_window_was_resized(gui_vulkan_window_t window, int* width, int* 
 VkSurfaceKHR gui_vulkan_window_create_surface(VkInstance instance, gui_vulkan_window_t window);
 bool gui_vulkan_create_resources(gui_vulkan_window_t window, gui_vulkan_resources_t resources);
 void gui_vulkan_destroy_resources(gui_vulkan_resources_t resources);
+int gui_run(int argc, char** argv, uint32_t width, uint32_t height, const char* app_name);
