@@ -130,3 +130,4 @@ void gui_controls_process_char(gui_controls_t controls, unsigned int codepoint);
 // Internal (called from vulkan.c)
 void gui_controls_draw_internal(gui_controls_t controls, VkCommandBuffer cmd, VkDevice device, VkPhysicalDevice physical_device, uint32_t screen_width, uint32_t screen_height);
 void gui_controls_cleanup_pending(VkDevice device);
+void gui_controls_process_key(gui_controls_t controls, int key, int scancode, int action, int mods);

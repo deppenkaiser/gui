@@ -8,6 +8,7 @@
 
 callback_declaration(void, gui_vulkan_render(gui_vulkan_resources_t resources, uint32_t image_index));
 callback_declaration(bool, gui_vulkan_load(gui_vulkan_resources_t resources));
+callback_declaration(void, gui_vulkan_setup(gui_vulkan_resources_t resources));
 callback_declaration(void, gui_vulkan_error(int error, const char* description));
 callback_declaration(void, gui_vulkan_key(GLFWwindow* window, int key, int scancode, int action, int mods));
 callback_declaration(void, gui_vulkan_mouse_button(GLFWwindow* window, int button, int action, int mods));
@@ -75,6 +76,15 @@ static void _glfw_key_callback(GLFWwindow* handle, int key, int scancode, int ac
             glfwSetWindowShouldClose(handle, GLFW_TRUE);
         }
     }
+    
+    // Internal controls processing
+    gui_controls_t controls = (gui_controls_t)glfwGetWindowUserPointer(handle);
+    if (controls)
+    {
+        gui_controls_process_key(controls, key, scancode, action, mods);
+    }
+    
+    // App callback for custom logic
     if (gui_vulkan_key)
     {
         gui_vulkan_key(handle, key, scancode, action, mods);
@@ -84,6 +94,15 @@ static void _glfw_key_callback(GLFWwindow* handle, int key, int scancode, int ac
 static void _glfw_mouse_button_callback(GLFWwindow* handle, int button, int action, int mods)
 {
     LOG("GLFW", "mouse_button=%d action=%d mods=%d", button, action, mods);
+    
+    // Internal controls processing
+    gui_controls_t controls = (gui_controls_t)glfwGetWindowUserPointer(handle);
+    if (controls)
+    {
+        gui_controls_process_mouse_button(controls, button, action);
+    }
+    
+    // App callback for custom logic
     if (gui_vulkan_mouse_button)
     {
         gui_vulkan_mouse_button(handle, button, action, mods);
@@ -93,18 +112,36 @@ static void _glfw_mouse_button_callback(GLFWwindow* handle, int button, int acti
 static void _glfw_cursor_pos_callback(GLFWwindow* handle, double x, double y)
 {
     LOG("GLFW", "cursor_pos=%.2f,%.2f", x, y);
+    
+    // Internal controls processing
+    gui_controls_t controls = (gui_controls_t)glfwGetWindowUserPointer(handle);
+    if (controls)
+    {
+        gui_controls_process_mouse_move(controls, (int)x, (int)y);
+    }
+    
+    // App callback for custom logic
     if (gui_vulkan_cursor_pos)
     {
         gui_vulkan_cursor_pos(handle, x, y);
     }
 }
 
-static void _glfw_scroll_callback(GLFWwindow* handle, double xoffset, double yoffset)
+static void _glfw_char_callback(GLFWwindow* handle, unsigned int codepoint)
 {
-    LOG("GLFW", "scroll=%.2f,%.2f", xoffset, yoffset);
-    if (gui_vulkan_scroll)
+    LOG("GLFW", "char=%u", codepoint);
+    
+    // Internal controls processing
+    gui_controls_t controls = (gui_controls_t)glfwGetWindowUserPointer(handle);
+    if (controls)
     {
-        gui_vulkan_scroll(handle, xoffset, yoffset);
+        gui_controls_process_char(controls, codepoint);
+    }
+    
+    // App callback for custom logic
+    if (gui_vulkan_char)
+    {
+        gui_vulkan_char(handle, codepoint);
     }
 }
 
@@ -189,12 +226,12 @@ static void _glfw_window_maximize_callback(GLFWwindow* handle, int maximized)
     }
 }
 
-static void _glfw_char_callback(GLFWwindow* handle, unsigned int codepoint)
+static void _glfw_scroll_callback(GLFWwindow* handle, double xoffset, double yoffset)
 {
-    LOG("GLFW", "char=%u", codepoint);
-    if (gui_vulkan_char)
+    LOG("GLFW", "scroll=%.2f,%.2f", xoffset, yoffset);
+    if (gui_vulkan_scroll)
     {
-        gui_vulkan_char(handle, codepoint);
+        gui_vulkan_scroll(handle, xoffset, yoffset);
     }
 }
 
@@ -434,16 +471,6 @@ bool gui_vulkan_create_resources(gui_vulkan_window_t window, gui_vulkan_resource
 
 			if (vg_device_create(&resources->instance, resources->surface, &device_config, &resources->device))
 			{
-				if (gui_vulkan_load)
-				{
-					if (!gui_vulkan_load(resources))
-					{
-						is_ok = false;
-						gui_vulkan_destroy_resources(resources);
-						return is_ok;
-					}
-				}
-
 				int width = 0, height = 0;
 				glfwGetWindowSize(window->handle, &width, &height);
 				struct vg_swapchain_config swap_config =
@@ -459,6 +486,22 @@ bool gui_vulkan_create_resources(gui_vulkan_window_t window, gui_vulkan_resource
 				if (is_ok)
 				{
 					is_ok = vg_renderer_create(&resources->swapchain, &resources->renderer);
+					if (is_ok)
+					{
+						// Create controls collection
+						resources->controls = gui_controls_create();
+						if (resources->controls)
+						{
+							// Store pointer for callbacks
+							glfwSetWindowUserPointer(window->handle, resources->controls);
+							
+							// Call user setup to populate controls
+							if (gui_vulkan_setup)
+							{
+								gui_vulkan_setup(resources);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -469,6 +512,12 @@ bool gui_vulkan_create_resources(gui_vulkan_window_t window, gui_vulkan_resource
 
 void gui_vulkan_destroy_resources(gui_vulkan_resources_t resources)
 {
+	if (resources->controls)
+	{
+		gui_controls_cleanup_pending(resources->device.device);
+		gui_controls_destroy(resources->controls);
+		resources->controls = NULL;
+	}
     vg_renderer_destroy(&resources->renderer);
 	vg_swapchain_destroy(&resources->swapchain);
 	vg_device_destroy(&resources->device);

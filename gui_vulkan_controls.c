@@ -258,6 +258,12 @@ void gui_controls_process_mouse_move(gui_controls_t controls, int x, int y)
     }
 }
 
+void gui_controls_process_key(gui_controls_t controls, int key, int scancode, int action, int mods)
+{
+    // Forward to controls (for focus handling etc.)
+    // Currently a no-op placeholder for future use
+}
+
 void gui_controls_process_mouse_button(gui_controls_t controls, int button, int action)
 {
     if (button != GLFW_MOUSE_BUTTON_LEFT) return;
