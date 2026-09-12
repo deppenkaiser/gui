@@ -271,7 +271,7 @@ VkSurfaceKHR gui_vulkan_window_create_surface(VkInstance instance, gui_vulkan_wi
     return result;
 }
 
-void gui_initialize_instance_config(vb_instance_config_t config)
+static void _gui_initialize_instance_config(vb_instance_config_t config)
 {
 	uint32_t ext_count = 0;
 	const char** ext = glfwGetRequiredInstanceExtensions(&ext_count);
@@ -281,50 +281,61 @@ void gui_initialize_instance_config(vb_instance_config_t config)
 	config->layer_names = NULL;
 }
 
-bool gui_vulkan_create_surface_device_and_swapchain(gui_vulkan_window_t window, vb_instance_t instance, gui_vulkan_resources_t resources)
+bool gui_vulkan_create_resources(gui_vulkan_window_t window, gui_vulkan_resources_t resources)
 {
 	bool is_ok = false;
-	
-	resources->surface = gui_vulkan_window_create_surface(instance->instance, window);
-	if (resources->surface != VK_NULL_HANDLE)
+
+	struct vb_instance_config config = {0};
+	_gui_initialize_instance_config(&config);
+
+	if (vb_initialize(&config, &resources->instance))
 	{
-		glfwWaitEventsTimeout(0.1);
-
-		const char* device_extensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-		struct vg_device_config device_config =
+		resources->surface = gui_vulkan_window_create_surface(resources->instance.instance, window);
+		if (resources->surface != VK_NULL_HANDLE)
 		{
-			.features = {0},
-			.extension_names = device_extensions,
-			.extension_count = 1,
-			.enable_anisotropy = true,
-			.enable_msaa = true
-		};
+			glfwWaitEventsTimeout(0.1);
 
-		if (vg_device_create(instance, resources->surface, &device_config, &resources->device))
-		{
-			int width = 0, height = 0;
-			
-			glfwGetWindowSize(window->handle, &width, &height);
-			struct vg_swapchain_config swap_config =
+			const char* device_extensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+			struct vg_device_config device_config =
 			{
-				.width = (uint32_t)width,
-				.height = (uint32_t)height,
-				.present_mode = VK_PRESENT_MODE_FIFO_KHR,
-				.image_count = 3,
-				.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
+				.features = {0},
+				.extension_names = device_extensions,
+				.extension_count = 1,
+				.enable_anisotropy = true,
+				.enable_msaa = true
 			};
 
-			is_ok = vg_swapchain_create(&resources->device, resources->surface, &swap_config, &resources->swapchain);
+			if (vg_device_create(&resources->instance, resources->surface, &device_config, &resources->device))
+			{
+				int width = 0, height = 0;
+
+				glfwGetWindowSize(window->handle, &width, &height);
+				struct vg_swapchain_config swap_config =
+				{
+					.width = (uint32_t)width,
+					.height = (uint32_t)height,
+					.present_mode = VK_PRESENT_MODE_FIFO_KHR,
+					.image_count = 3,
+					.transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR
+				};
+
+				is_ok = vg_swapchain_create(&resources->device, resources->surface, &swap_config, &resources->swapchain);
+            if (is_ok)
+            {
+                is_ok = vg_renderer_create(&resources->swapchain, &resources->renderer);
+            }
+			}
 		}
 	}
 
 	return is_ok;
 }
 
-void gui_vulkan_destroy_surface_device_and_swapchain(vb_instance_t instance, gui_vulkan_resources_t resources)
+void gui_vulkan_destroy_resources(gui_vulkan_resources_t resources)
 {
+    vg_renderer_destroy(&resources->renderer);
 	vg_swapchain_destroy(&resources->swapchain);
 	vg_device_destroy(&resources->device);
-	vkDestroySurfaceKHR(instance->instance, resources->surface, NULL);
+	vkDestroySurfaceKHR(resources->instance.instance, resources->surface, NULL);
 	resources->surface = NULL;
 }
