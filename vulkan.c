@@ -75,6 +75,27 @@ bool gui_window_poll_events(gui_window_t window)
     return result;
 }
 
+bool gui_window_was_resized(gui_window_t window, int* width, int* height)
+{
+    bool result = false;
+
+    if (window && window->handle)
+    {
+        int current_width, current_height;
+        glfwGetWindowSize(window->handle, &current_width, &current_height);
+        if (current_width != window->width || current_height != window->height)
+        {
+            window->width = current_width;
+            window->height = current_height;
+            if (width) *width = current_width;
+            if (height) *height = current_height;
+            result = true;
+        }
+    }
+
+    return result;
+}
+
 VkSurfaceKHR gui_window_create_surface(VkInstance instance, gui_window_t window)
 {
     VkSurfaceKHR result = VK_NULL_HANDLE;

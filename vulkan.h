@@ -18,5 +18,6 @@ typedef struct gui_window
 gui_window_t gui_window_create(int width, int height, const char* title);
 void gui_window_destroy(gui_window_t window);
 bool gui_window_poll_events(gui_window_t window);
+bool gui_window_was_resized(gui_window_t window, int* width, int* height);
 VkSurfaceKHR gui_window_create_surface(VkInstance instance, gui_window_t window);
 void gui_initialize_instance_config(vb_instance_config_t config);
