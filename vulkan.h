@@ -1,33 +1,20 @@
 #pragma once
 
-#include <gtk/gtk.h>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <stdbool.h>
 
-typedef struct _gui_vulkan
+typedef struct gui_window
 {
-    GtkWidget* vulkan_area;
-    VkSurfaceKHR surface;
-    VkInstance instance;
-    void* user_data;
-    bool initialized;
+    GLFWwindow* handle;
     int width;
     int height;
-    guint timer_id;
-    bool need_render;
-    bool need_close;
-    bool need_resize;
-    bool is_fullscreen;
-} *gui_vulkan_t;
+    const char* title;
+    bool should_close;
+}* gui_window_t;
 
-GtkWidget* gui_vulkan_create(VkInstance instance, void* user_data);
-void gui_vulkan_set_instance(GtkWidget* vulkan_widget, VkInstance instance);
-VkSurfaceKHR gui_vulkan_get_surface(GtkWidget* vulkan_widget);
-VkInstance gui_vulkan_get_instance(GtkWidget* vulkan_widget);
-GtkWidget* gui_vulkan_get_drawing_area(GtkWidget* vulkan_widget);
-bool gui_vulkan_is_initialized(GtkWidget* vulkan_widget);
-void gui_vulkan_queue_render(GtkWidget* vulkan_widget);
-void gui_vulkan_get_size(GtkWidget* vulkan_widget, int* width, int* height);
-void gui_vulkan_enter_fullscreen(GtkWidget* vulkan_widget);
-void gui_vulkan_leave_fullscreen(GtkWidget* vulkan_widget);
-void _gui_vulkan_request_close(GtkWidget* vulkan_widget);
+gui_window_t gui_window_create(int width, int height, const char* title);
+void gui_window_destroy(gui_window_t window);
+bool gui_window_poll_events(gui_window_t window);
+VkSurfaceKHR gui_window_create_surface(VkInstance instance, gui_window_t window);

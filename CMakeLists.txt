@@ -10,6 +10,7 @@ pkg_check_modules(VULKAN REQUIRED IMPORTED_TARGET vulkan)
 pkg_check_modules(X11 REQUIRED IMPORTED_TARGET x11)
 pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb)
 pkg_check_modules(X11_XCB REQUIRED IMPORTED_TARGET x11-xcb)
+pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -49,6 +50,7 @@ target_link_libraries(gui
 	PUBLIC
 		PkgConfig::GTK4
 		PkgConfig::VULKAN
+		PkgConfig::GLFW
 		logging
 		threading
 		string
