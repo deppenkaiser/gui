@@ -424,25 +424,36 @@ static void _gui_draw_list(gui_draw_context_t* ctx, gui_control_t control)
     
     // Items
     gui_list_t* list = &control->data.list;
+    
+    // Distribute items evenly across available height
+    uint32_t visible_count = list->item_count;
+    if (visible_count == 0) visible_count = 1;
+    int item_h = r->height / (int)visible_count;
+    if (item_h < 28) item_h = 28;
+    
     int y_offset = 0;
-    for (uint32_t i = list->scroll_offset; i < list->item_count && y_offset < r->height - (int)list->item_height; i++)
+    for (uint32_t i = list->scroll_offset; i < list->item_count && y_offset + item_h <= r->height; i++)
     {
         int item_y = r->y + y_offset;
         bool selected = (i == (uint32_t)list->selected_index);
         
         if (selected)
         {
-            _gui_draw_rect(ctx, r->x + 1, item_y, r->width - 2, list->item_height, 0.3f, 0.5f, 0.8f);
+            _gui_draw_rect(ctx, r->x + 1, item_y, r->width - 2, item_h, 0.3f, 0.5f, 0.8f);
         }
         
         int text_len = (int)strlen(list->items[i].text);
         if (text_len > 0)
         {
             int text_w = text_len * 6;
-            _gui_draw_rect(ctx, r->x + 5, item_y + (list->item_height - 8) / 2, text_w, 8, 0.9f, 0.9f, 0.9f);
+            int text_h = item_h / 2;
+            if (text_h < 22) text_h = 22;
+            int text_x = r->x + 5;
+            int text_y = item_y + (item_h - text_h) / 2;
+            _gui_draw_rect(ctx, text_x, text_y, text_w, text_h, 0.9f, 0.9f, 0.9f);
         }
         
-        y_offset += list->item_height;
+        y_offset += item_h;
     }
     
     // Border
