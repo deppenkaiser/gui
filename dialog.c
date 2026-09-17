@@ -9,7 +9,7 @@ extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void _gui_remove_widget_from_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 
-private void _gui_dialog_destroy(GtkWidget* widget, gpointer user_data)
+static void _gui_dialog_destroy(GtkWidget* widget, gpointer user_data)
 {
     gui_dialog_t core = (gui_dialog_t) user_data;
     if (gui_dialog != NULL)
@@ -22,7 +22,7 @@ private void _gui_dialog_destroy(GtkWidget* widget, gpointer user_data)
     _gui_remove_widget_from_internal_list(widget);
 }
 
-private gboolean _gui_dialog_close_request(GtkWindow* self, gpointer user_data)
+static gboolean _gui_dialog_close_request(GtkWindow* self, gpointer user_data)
 {
     gboolean close = FALSE;
     gui_dialog_t core = (gui_dialog_t) user_data;

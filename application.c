@@ -8,7 +8,7 @@
 
 callback_declaration(bool, gui_application(gui_event_type_t event, gui_application_t core));
 
-private void _gui_application_startup(GApplication* app, gpointer user_data)
+static void _gui_application_startup(GApplication* app, gpointer user_data)
 {
 	if (gui_application != NULL)
 	{
@@ -21,7 +21,7 @@ private void _gui_application_startup(GApplication* app, gpointer user_data)
 	}
 }
 
-private void _gui_application_activate(GApplication* app, gpointer user_data)
+static void _gui_application_activate(GApplication* app, gpointer user_data)
 {
 	if (gui_application != NULL)
 	{
@@ -34,7 +34,7 @@ private void _gui_application_activate(GApplication* app, gpointer user_data)
 	}
 }
 
-private void _gui_application_shutdown(GApplication* app, gpointer user_data)
+static void _gui_application_shutdown(GApplication* app, gpointer user_data)
 {
 	if (gui_application != NULL)
 	{

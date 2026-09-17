@@ -8,14 +8,14 @@ callback_declaration(void, gui_gl(gui_gl_t core, gui_event_t e));
 protected_import(void*, _gui_get_core(GtkWidget*));
 protected_import(void, _gui_add_widget_to_internal_list(GtkWidget*));
 
-private gboolean _gl_tick_cb(GtkWidget* widget, GdkFrameClock* clock, gpointer user_data)
+static gboolean _gl_tick_cb(GtkWidget* widget, GdkFrameClock* clock, gpointer user_data)
 {
     gui_gl_t core = user_data;
     gtk_gl_area_queue_render(GTK_GL_AREA(widget));
     return G_SOURCE_CONTINUE; // Loop weiterlaufen lassen
 }
 
-private gboolean _gui_gl_render(GtkGLArea *area, GdkGLContext *context, gpointer user_data)
+static gboolean _gui_gl_render(GtkGLArea *area, GdkGLContext *context, gpointer user_data)
 {
 	gui_gl_t core = user_data;
 
@@ -42,7 +42,7 @@ private gboolean _gui_gl_render(GtkGLArea *area, GdkGLContext *context, gpointer
 	return TRUE;
 }
 
-private void _gui_gl_realize(GtkGLArea *area, gpointer user_data)
+static void _gui_gl_realize(GtkGLArea *area, gpointer user_data)
 {
 	gui_gl_t core = user_data;
 

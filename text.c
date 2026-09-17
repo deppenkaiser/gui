@@ -6,7 +6,7 @@
 extern void _gui_add_widget_to_internal_list(GtkWidget* widget);
 extern void* _gui_get_core(GtkWidget* widget);
 
-private void _gui_text_changed(GtkEditable* self, gpointer user_data)
+static void _gui_text_changed(GtkEditable* self, gpointer user_data)
 {
     gui_text_t data = (gui_text_t) user_data;
     GtkEntryBuffer* buffer = gtk_text_get_buffer(GTK_TEXT(self));

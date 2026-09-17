@@ -8,7 +8,7 @@ callback_declaration(void, gui_drawing_area(gui_drawing_area_t core, gui_event_t
 protected_import(void, _gui_add_widget_to_internal_list(GtkWidget* widget));
 protected_import(void*, _gui_get_core(GtkWidget* widget));
 
-private void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, int width, int height, gpointer user_data)
+static void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, int width, int height, gpointer user_data)
 {
 	if (gui_drawing_area != NULL)
 	{
@@ -23,7 +23,7 @@ private void _gui_drawing_area_draw(GtkDrawingArea* drawing_area, cairo_t* cr, i
 	}
 }
 
-private void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press, gdouble x, gdouble y, gpointer user_data)
+static void _gui_drawing_area_mouse_button_pressed(GtkGestureClick* self, gint n_press, gdouble x, gdouble y, gpointer user_data)
 {
 	if (gui_drawing_area != NULL)
 	{
