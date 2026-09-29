@@ -16,10 +16,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_library(gui STATIC)
-add_subdirectory(../logging ${CMAKE_BINARY_DIR}/logging_from_gui)
-add_subdirectory(../threading ${CMAKE_BINARY_DIR}/threading_from_gui)
-add_subdirectory(../string ${CMAKE_BINARY_DIR}/string_from_gui)
-add_subdirectory(../api ${CMAKE_BINARY_DIR}/api_from_gui)
+add_subdirectory(../logging ${CMAKE_BINARY_DIR}/libs_build/logging_from_gui)
+add_subdirectory(../threading ${CMAKE_BINARY_DIR}/libs_build/threading_from_gui)
+add_subdirectory(../string ${CMAKE_BINARY_DIR}/libs_build/string_from_gui)
+add_subdirectory(../api ${CMAKE_BINARY_DIR}/libs_build/api_from_gui)
 
 target_sources(gui PRIVATE
 	gui.c
